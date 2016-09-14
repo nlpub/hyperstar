@@ -92,3 +92,4 @@ ENV/
 *.txt
 *.w2v
 *.npy
+*.npz
