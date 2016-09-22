@@ -5,11 +5,12 @@ import numpy as np
 import tensorflow as tf
 from sklearn.cluster import KMeans
 
-from data              import Data
-from baseline          import Baseline,         BaselineCosine
-from negative_hyponym  import NegativeHyponym,  NegativeHyponymCosine
-from negative_hypernym import NegativeHypernym, NegativeHypernymCosine
-from negative_synonym  import NegativeSynonym,  NegativeSynonymCosine
+from data               import Data
+from baseline           import Baseline,          BaselineCosine
+from positive_hypernym  import PositiveHypernym,  PositiveHypernymCosine
+from negative_frobenius import NegativeFrobenius, NegativeFrobeniusCosine
+from negative_hyponym   import NegativeHyponym,   NegativeHyponymCosine
+from negative_synonym   import NegativeSynonym,   NegativeSynonymCosine
 
 flags = tf.app.flags
 FLAGS = flags.FLAGS
@@ -26,14 +27,18 @@ def model_class(name):
         return Baseline
     elif name.lower() == 'baseline_cosine':
         return BaselineCosine
+    elif name.lower() == 'positive_hypernym':
+        return PositiveHypernym
+    elif name.lower() == 'positive_hypernym_cosine':
+        return PositiveHypernymCosine
     elif name.lower() == 'negative_hyponym':
         return NegativeHyponym
     elif name.lower() == 'negative_hyponym_cosine':
         return NegativeHyponymCosine
-    elif name.lower() == 'negative_hypernym':
-        return NegativeHypernym
-    elif name.lower() == 'negative_hypernym_cosine':
-        return NegativeHypernymCosine
+    elif name.lower() == 'negative_frobenius':
+        return NegativeFrobenius
+    elif name.lower() == 'negative_frobenius_cosine':
+        return NegativeFrobeniusCosine
     elif name.lower() == 'negative_synonym':
         return NegativeSynonym
     elif name.lower() == 'negative_synonym_cosine':
