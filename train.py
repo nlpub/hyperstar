@@ -41,12 +41,6 @@ def model_class(name):
     else:
         raise LookupError(name)
 
-def train_data():
-    pass
-
-def test_data():
-    pass
-
 def train(config, model, data):
     train_op = tf.train.AdamOptimizer(epsilon=1.).minimize(model.loss)
 
@@ -95,6 +89,7 @@ def train(config, model, data):
 
 def main(_):
     random.seed(FLAGS.seed)
+    tf.set_random_seed(FLAGS.seed)
 
     config = tf.ConfigProto() if FLAGS.gpu else tf.ConfigProto(device_count={'GPU': 0})
 
