@@ -20,14 +20,15 @@ with open('subsumptions-test.txt') as f:
     for row in reader:
         subsumptions_test.append((row[0], row[1]))
 
-accuracies = {}
+measures = {}
 
 for i, (hyponym, hypernym) in enumerate(subsumptions_test):
     actual  = {w for w, _ in w2v.most_similar(positive=[w2v[hyponym]], topn=10)}
     measure = 1. if hypernym in actual else 0.
-    accuracies[(hyponym, hypernym)] = measure
+    measures[(hyponym, hypernym)] = measure
 
     if (i + 1) % 100 == 0:
-        print('%d examples out of %d done for the identity setting.' % (i + 1, len(subsumptions_test)), file=sys.stderr)
+        print('%d examples out of %d done for the identity setting, A@10 is %6f.' % (i + 1,
+            len(subsumptions_test), sum(measures.values()) / len(subsumptions_test)), file=sys.stderr)
 
-print('Overall A@10 is %.4f %%.' % (sum(accuracies.values()) / len(accuracies) * 100))
+print('Overall A@10 is %.4f.' % (sum(measures.values()) / len(subsumptions_test)))

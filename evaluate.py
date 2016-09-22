@@ -48,7 +48,7 @@ for path in glob.glob('%s.W-*.txt' % (MODEL)):
     print('Loading "%s" as the cluster %d.' % (path, cluster))
     W[cluster] = np.loadtxt(path)
 
-accuracies = {}
+measures = {}
 cache = defaultdict(lambda: {})
 
 for i, (hyponym, hypernym) in enumerate(subsumptions_test):
@@ -62,9 +62,11 @@ for i, (hyponym, hypernym) in enumerate(subsumptions_test):
 
     actual  = cache[cluster][hyponym]
     measure = 1. if hypernym in actual else 0.
-    accuracies[(hyponym, hypernym)] = measure
+    measures[(hyponym, hypernym)] = measure
 
     if (i + 1) % 100 == 0:
-        print('%d examples out of %d done for "%s".' % (i + 1, len(subsumptions_test), MODEL), file=sys.stderr)
+        print('%d examples out of %d done for "%s", A@10 is %6f.' % (i + 1,
+            len(subsumptions_test), MODEL,
+            sum(measures.values()) / len(subsumptions_test)), file=sys.stderr)
 
-print('Overall A@10 is %.4f %%.' % (sum(accuracies.values()) / len(accuracies) * 100))
+print('Overall A@10 is %.4f.' % (sum(measures.values()) / len(subsumptions_test)))
