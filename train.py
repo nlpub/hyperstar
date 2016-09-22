@@ -30,8 +30,6 @@ MODELS = {
     'positive_hypernym_cosine':  PositiveHypernymCosine,
     'negative_hyponym':          NegativeHyponym,
     'negative_hyponym_cosine':   NegativeHyponymCosine,
-    'negative_frobenius':        NegativeFrobenius,
-    'negative_frobenius_cosine': NegativeFrobeniusCosine,
     'negative_synonym':          NegativeSynonym,
     'negative_synonym_cosine':   NegativeSynonymCosine
 }
