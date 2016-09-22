@@ -1,5 +1,5 @@
 import tensorflow as tf
-from negative_hyponym import NegativeHyponym, NegativeHyponymCosine
+from .negative_hyponym import NegativeHyponym, NegativeHyponymCosine
 
 class NegativeSynonym(NegativeHyponym):
     """

@@ -1,5 +1,5 @@
 import tensorflow as tf
-from baseline import Baseline, BaselineCosine
+from .baseline import Baseline, BaselineCosine
 
 class PositiveHypernym(Baseline):
     """
