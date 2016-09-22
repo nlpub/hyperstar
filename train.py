@@ -24,6 +24,8 @@ flags.DEFINE_boolean('gpu',         True, 'Try using GPU.')
 MODELS = {
     'baseline':                  Baseline,
     'baseline_cosine':           BaselineCosine,
+    'negative_frobenius':        NegativeFrobenius,
+    'negative_frobenius_cosine': NegativeFrobeniusCosine,
     'positive_hypernym':         PositiveHypernym,
     'positive_hypernym_cosine':  PositiveHypernymCosine,
     'negative_hyponym':          NegativeHyponym,
