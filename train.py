@@ -5,12 +5,12 @@ import numpy as np
 import tensorflow as tf
 from sklearn.cluster import KMeans
 
-from data               import Data
-from baseline           import Baseline,          BaselineCosine
-from positive_hypernym  import PositiveHypernym,  PositiveHypernymCosine
-from negative_frobenius import NegativeFrobenius, NegativeFrobeniusCosine
-from negative_hyponym   import NegativeHyponym,   NegativeHyponymCosine
-from negative_synonym   import NegativeSynonym,   NegativeSynonymCosine
+from projlearn import Data, \
+    Baseline,          BaselineCosine, \
+    NegativeFrobenius, NegativeFrobeniusCosine, \
+    NegativeHyponym,   NegativeHyponymCosine, \
+    NegativeSynonym,   NegativeSynonymCosine, \
+    PositiveHypernym,  PositiveHypernymCosine
 
 flags = tf.app.flags
 FLAGS = flags.FLAGS
@@ -21,30 +21,18 @@ flags.DEFINE_integer('num_epochs',  8000, 'Number of training epochs.')
 flags.DEFINE_integer('batch_size',   512, 'Batch size.')
 flags.DEFINE_boolean('gpu',         True, 'Try using GPU.')
 
-def model_class(name):
-    name = name.lower()
-    if name.lower() == 'baseline':
-        return Baseline
-    elif name.lower() == 'baseline_cosine':
-        return BaselineCosine
-    elif name.lower() == 'positive_hypernym':
-        return PositiveHypernym
-    elif name.lower() == 'positive_hypernym_cosine':
-        return PositiveHypernymCosine
-    elif name.lower() == 'negative_hyponym':
-        return NegativeHyponym
-    elif name.lower() == 'negative_hyponym_cosine':
-        return NegativeHyponymCosine
-    elif name.lower() == 'negative_frobenius':
-        return NegativeFrobenius
-    elif name.lower() == 'negative_frobenius_cosine':
-        return NegativeFrobeniusCosine
-    elif name.lower() == 'negative_synonym':
-        return NegativeSynonym
-    elif name.lower() == 'negative_synonym_cosine':
-        return NegativeSynonymCosine
-    else:
-        raise LookupError(name)
+MODELS = {
+    'baseline':                  Baseline,
+    'baseline_cosine':           BaselineCosine,
+    'positive_hypernym':         PositiveHypernym,
+    'positive_hypernym_cosine':  PositiveHypernymCosine,
+    'negative_hyponym':          NegativeHyponym,
+    'negative_hyponym_cosine':   NegativeHyponymCosine,
+    'negative_frobenius':        NegativeFrobenius,
+    'negative_frobenius_cosine': NegativeFrobeniusCosine,
+    'negative_synonym':          NegativeSynonym,
+    'negative_synonym_cosine':   NegativeSynonymCosine
+}
 
 def train(config, model, data):
     train_op = tf.train.AdamOptimizer(epsilon=1.).minimize(model.loss)
@@ -111,7 +99,7 @@ def main(_):
     clusters_train = kmeans.predict(Y_all_train - X_all_train)
     clusters_test  = kmeans.predict(Y_all_test  - X_all_test)
 
-    model = model_class(FLAGS.model)(x_size=X_all_train.shape[1], y_size=Y_all_train.shape[1])
+    model = MODELS[FLAGS.model](x_size=X_all_train.shape[1], y_size=Y_all_train.shape[1])
     print('The model class is %s.' % (type(model).__name__))
 
     for path in glob.glob('%s.W-*.txt' % (FLAGS.model)):
