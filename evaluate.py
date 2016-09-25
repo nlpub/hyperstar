@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
-import os, glob, sys, csv, math, re, random, pickle
-from collections import defaultdict
+import csv
+import glob
+import pickle
+import random
+import re
+import sys
 import numpy as np
-from sklearn.cluster import KMeans
 
 RANDOM_SEED = 228
 random.seed(RANDOM_SEED)

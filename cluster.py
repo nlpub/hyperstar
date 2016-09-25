@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 
-import os, sys, csv, math, operator, random, pickle
+import csv
+import operator
+import pickle
+import random
+import sys
 import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score

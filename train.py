@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
-import os, glob, sys, csv, math, random, datetime, pickle
+import datetime
+import glob
+import os
+import pickle
+import random
 import numpy as np
 import tensorflow as tf
-from sklearn.cluster import KMeans
 
 from projlearn import Data, \
     Baseline,          BaselineCosine, \
