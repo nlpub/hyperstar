@@ -78,10 +78,6 @@ for i, (hyponym, hypernym) in enumerate(subsumptions_test):
             sum(measures5.values())  / len(subsumptions_test),
             sum(measures10.values()) / len(subsumptions_test)), file=sys.stderr)
 
-average_a1  = sum(measures1.values())  / len(subsumptions_test)
-average_a5  = sum(measures5.values())  / len(subsumptions_test)
-average_a10 = sum(measures10.values()) / len(subsumptions_test)
-
 print('Overall A@1 is %.4f, A@5 is %.4f and A@10 is %.4f.' % (
     sum(measures1.values())  / len(subsumptions_test),
     sum(measures5.values())  / len(subsumptions_test),
