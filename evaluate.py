@@ -63,10 +63,10 @@ for i, (hyponym, hypernym) in enumerate(subsumptions_test):
     actual  = cache[cluster][hyponym]
 
     measure1 = 1. if hypernym in actual[:1] else 0.
-    measures10[(hyponym, hypernym)] = measure1
+    measures1[(hyponym, hypernym)] = measure1
 
     measure5 = 1. if hypernym in actual[:5] else 0.
-    measures10[(hyponym, hypernym)] = measure5
+    measures1[(hyponym, hypernym)] = measure5
 
     measure10 = 1. if hypernym in actual[:10] else 0.
     measures10[(hyponym, hypernym)] = measure10
