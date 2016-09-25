@@ -10,7 +10,7 @@ random.seed(RANDOM_SEED)
 w2v = Word2Vec.load_word2vec_format('all.norm-sz100-w10-cb0-it1-min100.w2v', binary=True, unicode_errors='ignore')
 w2v.init_sims(replace=True)
 
-with np.load('test-vectors.npz') as data:
+with np.load('test.npz') as data:
     X_all_test, Y_all_test = data['X_all_test'], data['Y_all_test']
 
 subsumptions_test = []
@@ -25,8 +25,8 @@ measures1, measures5, measures10 = {}, {}, {}
 for i, (hyponym, hypernym) in enumerate(subsumptions_test):
     actual  = [w for w, _ in w2v.most_similar(positive=[w2v[hyponym]], topn=10)]
 
-    measures1[(hyponym, hypernym)] = 1. if hypernym in actual[:1] else 0.
-    measures5[(hyponym, hypernym)] = 1. if hypernym in actual[:5] else 0.
+    measures1[(hyponym, hypernym)]  = 1. if hypernym in actual[:1]  else 0.
+    measures5[(hyponym, hypernym)]  = 1. if hypernym in actual[:5]  else 0.
     measures10[(hyponym, hypernym)] = 1. if hypernym in actual[:10] else 0.
 
     if (i + 1) % 100 == 0:
