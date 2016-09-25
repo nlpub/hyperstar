@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
-import sys, csv, random
+import csv
+import random
+import sys
 from gensim.models.word2vec import Word2Vec
 import numpy as np
 
