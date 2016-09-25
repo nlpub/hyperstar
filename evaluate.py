@@ -48,7 +48,7 @@ for path in glob.glob('%s.W-*.txt' % (MODEL)):
     print('Loading "%s" as the cluster %d.' % (path, cluster))
     W[cluster] = np.loadtxt(path)
 
-measures = {}
+measures1, measures5, measures10 = {}, {}, {}
 cache = defaultdict(lambda: {})
 
 for i, (hyponym, hypernym) in enumerate(subsumptions_test):
@@ -58,15 +58,31 @@ for i, (hyponym, hypernym) in enumerate(subsumptions_test):
         X_example = np.ones((1, X_all_test.shape[1] + 1))
         X_example[:, 1:] = w2v[hyponym]
         Y_example = X_example.dot(W[cluster]).reshape(X_all_test.shape[1],)
-        cache[cluster][hyponym] = {w for w, _ in w2v.most_similar(positive=[Y_example], topn=10)}
+        cache[cluster][hyponym] = [w for w, _ in w2v.most_similar(positive=[Y_example], topn=10)]
 
     actual  = cache[cluster][hyponym]
-    measure = 1. if hypernym in actual else 0.
-    measures[(hyponym, hypernym)] = measure
+
+    measure1 = 1. if hypernym in actual[:1] else 0.
+    measures10[(hyponym, hypernym)] = measure1
+
+    measure5 = 1. if hypernym in actual[:5] else 0.
+    measures10[(hyponym, hypernym)] = measure5
+
+    measure10 = 1. if hypernym in actual[:10] else 0.
+    measures10[(hyponym, hypernym)] = measure10
 
     if (i + 1) % 100 == 0:
-        print('%d examples out of %d done for "%s", A@10 is %6f.' % (i + 1,
+        print('%d examples out of %d done for "%s": A@1 is %.6f, A@5 is %.6f and A@10 is %.6f.' % (i + 1,
             len(subsumptions_test), MODEL,
-            sum(measures.values()) / len(subsumptions_test)), file=sys.stderr)
+            sum(measures1.values())  / len(subsumptions_test),
+            sum(measures5.values())  / len(subsumptions_test),
+            sum(measures10.values()) / len(subsumptions_test)), file=sys.stderr)
 
-print('Overall A@10 is %.4f.' % (sum(measures.values()) / len(subsumptions_test)))
+average_a1  = sum(measures1.values())  / len(subsumptions_test)
+average_a5  = sum(measures5.values())  / len(subsumptions_test)
+average_a10 = sum(measures10.values()) / len(subsumptions_test)
+
+print('Overall A@1 is %.4f, A@5 is %.4f and A@10 is %.4f.' % (
+    sum(measures1.values())  / len(subsumptions_test),
+    sum(measures5.values())  / len(subsumptions_test),
+    sum(measures10.values()) / len(subsumptions_test)))
