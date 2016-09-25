@@ -9,10 +9,10 @@ from multiprocessing import Pool
 RANDOM_SEED = 228
 random.seed(RANDOM_SEED)
 
-with np.load('train-vectors.npz') as data:
+with np.load('train.npz') as data:
     X_all_train, Y_all_train = data['X_all_train'], data['Y_all_train']
 
-with np.load('test-vectors.npz') as data:
+with np.load('test.npz') as data:
     X_all_test, Y_all_test = data['X_all_test'], data['Y_all_test']
 
 train_offsets = Y_all_train - X_all_train
