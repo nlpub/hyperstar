@@ -71,7 +71,7 @@ for i, (hyponym, hypernym) in enumerate(subsumptions_test):
     measures5[(hyponym, hypernym)]  = 1. if cosine_hat > c5_test  else 0.
     measures10[(hyponym, hypernym)] = 1. if cosine_hat > c10_test else 0.
 
-    if (i + 1) % 100 == 0:
+    if (i + 1) % 1000 == 0:
         print('%d examples out of %d done for "%s": A@1 is %.6f, A@5 is %.6f and A@10 is %.6f.' % (i + 1,
             len(subsumptions_test), MODEL,
             sum(measures1.values())  / len(subsumptions_test),
