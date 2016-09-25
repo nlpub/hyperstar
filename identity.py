@@ -25,14 +25,9 @@ measures1, measures5, measures10 = {}, {}, {}
 for i, (hyponym, hypernym) in enumerate(subsumptions_test):
     actual  = [w for w, _ in w2v.most_similar(positive=[w2v[hyponym]], topn=10)]
 
-    measure1 = 1. if hypernym in actual[:1] else 0.
-    measures10[(hyponym, hypernym)] = measure1
-
-    measure5 = 1. if hypernym in actual[:5] else 0.
-    measures10[(hyponym, hypernym)] = measure5
-
-    measure10 = 1. if hypernym in actual[:10] else 0.
-    measures10[(hyponym, hypernym)] = measure10
+    measures1[(hyponym, hypernym)] = 1. if hypernym in actual[:1] else 0.
+    measures5[(hyponym, hypernym)] = 1. if hypernym in actual[:5] else 0.
+    measures10[(hyponym, hypernym)] = 1. if hypernym in actual[:10] else 0.
 
     if (i + 1) % 100 == 0:
         print('%d identity examples out of %d done: A@1 is %.6f, A@5 is %.6f and A@10 is %.6f.' % (i + 1,
