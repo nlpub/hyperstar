@@ -40,7 +40,7 @@ After the training, the number of `MODEL.W-k.txt` files being generated represen
 
 ## Evaluating
 
-The evaluation script has only one parameter: the previously trained model to evaluate. Example: `./evaluate.py`. It is also possible to study how good (but usually bad) the original embeddings represent the subsumptions. For that, it is simply enough to run `./identity.py`.
+The evaluation script has only one parameter: the previously trained model to evaluate. Example: `./evaluate.py baseline`. It is also possible to study how good (but usually bad) the original embeddings represent the subsumptions. For that, it is simply enough to run `./identity.py`.
 
 ## Copyright
 
