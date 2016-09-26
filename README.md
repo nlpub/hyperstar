@@ -16,7 +16,7 @@ This implementation is designed for processing the Russian language, but there s
 
 ## Models
 
-The original approach learns a matrix such that transforms an input hyponym embedding vector into its hypernym embedding vector. This is the baseline that works well. A few variations of this approach have also been implemented. The following models are available:
+The original approach learns a matrix such that transforms an input hyponym embedding vector into its hypernym embedding vector. A few variations of this approach have also been implemented. The following models are available:
 
 * `baseline`, the original approach,
 * `negative_hyponym` that penalizes the matrix to projecting the hypernyms back to the hyponyms,
