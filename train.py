@@ -58,7 +58,7 @@ def train(config, model, data):
         }
 
         print('Cluster %d: %d train items and %d test items available.' % (
-            data.cluster + 1, data.X_train.shape[0], data.X_test.shape[0]))
+            data.cluster + 1, data.X_train.shape[0], data.X_test.shape[0]), flush=True)
 
         for step in range(0, FLAGS.num_epochs):
             batch = np.random.randint(0, data.X_train.shape[0], FLAGS.batch_size)
@@ -78,9 +78,9 @@ def train(config, model, data):
                 train_losses.append(sess.run(model.loss, feed_dict=feed_dict_train))
                 test_losses.append(sess.run(model.loss, feed_dict=feed_dict_test))
                 print('Cluster %d: step = %05d, train loss = %f, test loss = %f.' % (
-                    data.cluster + 1, step + 1, train_losses[-1], test_losses[-1]))
+                    data.cluster + 1, step + 1, train_losses[-1], test_losses[-1]), flush=True)
 
-        print('Cluster %d done in %s.' % (data.cluster + 1, str(sum(train_times, datetime.timedelta()))))
+        print('Cluster %d done in %s.' % (data.cluster + 1, str(sum(train_times, datetime.timedelta()))), flush=True)
         return sess.run(model.W)
 
 def main(_):
@@ -103,10 +103,10 @@ def main(_):
     clusters_test  = kmeans.predict(Y_all_test  - X_all_test)
 
     model = MODELS[FLAGS.model](x_size=X_all_train.shape[1], y_size=Y_all_train.shape[1])
-    print('The model class is %s.' % (type(model).__name__))
+    print('The model class is %s.' % (type(model).__name__), flush=True)
 
     for path in glob.glob('%s.W-*.txt' % (FLAGS.model)):
-        print('Removing a stale file: "%s".' % path)
+        print('Removing a stale file: "%s".' % path, flush=True)
         os.remove(path)
 
     for cluster in range(kmeans.n_clusters):
