@@ -22,23 +22,18 @@ with open('subsumptions-test.txt') as f:
     for row in reader:
         subsumptions_test.append((row[0], row[1]))
 
-measures1, measures5, measures10 = {}, {}, {}
+measures = [{} for _ in range(0, 10)]
 
 for i, (hyponym, hypernym) in enumerate(subsumptions_test):
     actual  = [w for w, _ in w2v.most_similar(positive=[w2v[hyponym]], topn=10)]
 
-    measures1[(hyponym, hypernym)]  = 1. if hypernym in actual[:1]  else 0.
-    measures5[(hyponym, hypernym)]  = 1. if hypernym in actual[:5]  else 0.
-    measures10[(hyponym, hypernym)] = 1. if hypernym in actual[:10] else 0.
+    for j in range(0, len(measures)):
+        measures[j][(hyponym, hypernym)] = 1. if hypernym in actual[:j + 1] else 0.
 
     if (i + 1) % 100 == 0:
-        print('%d identity examples out of %d done: A@1 is %.6f, A@5 is %.6f and A@10 is %.6f.' % (i + 1,
+        print('%d examples out of %d done for identity: %s.' % (i + 1,
             len(subsumptions_test),
-            sum(measures1.values())  / len(subsumptions_test),
-            sum(measures5.values())  / len(subsumptions_test),
-            sum(measures10.values()) / len(subsumptions_test)), file=sys.stderr)
+            ', '.join(['@%d=%.6f' % (i + 1, sum(measures[i].values()) / len(subsumptions_test)) for i in range(len(measures))])),
+            file=sys.stderr, flush=True)
 
-print('Overall A@1 is %.4f, A@5 is %.4f and A@10 is %.4f.' % (
-    sum(measures1.values())  / len(subsumptions_test),
-    sum(measures5.values())  / len(subsumptions_test),
-    sum(measures10.values()) / len(subsumptions_test)))
+print('For identity: overall %s.' % (', '.join(['@%d=%.4f' % (i + 1, sum(measures[i].values()) / len(subsumptions_test)) for i in range(len(measures))])), flush=True)

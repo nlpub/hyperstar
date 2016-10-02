@@ -27,7 +27,7 @@ The original approach learns a matrix such that transforms an input hyponym embe
 
 Before any processing, certain things need to be precomputed, such as training and test sets, etc. For that, the `./prepare.py` script should be executed. On large embeddings, it might take a long time, but it is run only once.
 
-Having the preparation script finished, the vector space should be separated into a number of clusters using the `./cluster.py` script. This is found to be very useful to improving the results, so it is not possible to continue without clustering. Usually, the clustering program automatically estimates the number of clusters using the [silhouette method](https://en.wikipedia.org/wiki/Silhouette_(clustering)), but it is possible to explicitly specify the desired number of clusters, e.g., `./cluster 1`.
+Having the preparation script finished, the vector space should be separated into a number of clusters using the `./cluster.py` script. This is found to be very useful to improving the results, so it is not possible to continue without clustering. Usually, the clustering program automatically estimates the number of clusters using the [silhouette method](https://en.wikipedia.org/wiki/Silhouette_(clustering)), but it is possible to explicitly specify the desired number of clusters, e.g., `./cluster.py 1`.
 
 The training procedure is implemented in the `./train.py` script. It accepts various parameters:
 
