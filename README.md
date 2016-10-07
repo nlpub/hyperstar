@@ -4,6 +4,16 @@ This is the implementation of the projection learning approach for learning word
 
 [Fu et al., 2014]: http://aclanthology.info/papers/learning-semantic-hierarchies-via-word-embeddings
 
+## Citation
+
+In case this software, the study or the dataset was useful for you, please cite the following paper.
+
+* Accepted for publication.
+
+```latex
+% Accepted for publication.
+```
+
 ## Prerequisites
 
 This implementation is designed for processing the Russian language, but there should be no problem in running it on any other language provided with the relevant datasets. However, for processing the Russian language, the following datasets are required:
