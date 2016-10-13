@@ -2,32 +2,35 @@
 
 import csv
 import glob
+import os
 import pickle
 import random
 import re
 import sys
+from gensim.models.word2vec import Word2Vec
+from collections import defaultdict
 import numpy as np
+from sklearn.cluster import KMeans
 
 RANDOM_SEED = 228
 random.seed(RANDOM_SEED)
 
+MODELS = ['baseline', 'negative_hyponym', 'negative_synonym', 'positive_hypernym']
+
 if not len(sys.argv) > 1:
-    print('Usage: %s model' % (sys.argv[0]), file=sys.stderr)
+    print('Usage: %s path...' % (sys.argv[0]), file=sys.stderr)
     sys.exit(1)
 
-MODEL = sys.argv[1]
+WD = os.path.dirname(os.path.realpath(__file__))
+
+w2v = Word2Vec.load_word2vec_format(os.path.join(WD, 'all.norm-sz100-w10-cb0-it1-min100.w2v'), binary=True, unicode_errors='ignore')
+w2v.init_sims(replace=True)
 
 with np.load('train.npz') as data:
     X_all_train, Y_all_train = data['X_all_train'], data['Y_all_train']
-    c1_train  = data['cd1_train'][0]
-    c5_train  = data['cd5_train'][0]
-    c10_train = data['cd10_train'][0]
 
 with np.load('test.npz') as data:
     X_all_test, Y_all_test = data['X_all_test'], data['Y_all_test']
-    c1_test  = data['cd1_test'][0]
-    c5_test  = data['cd5_test'][0]
-    c10_test = data['cd10_test'][0]
 
 subsumptions_test = []
 
@@ -36,49 +39,49 @@ with open('subsumptions-test.txt') as f:
     for row in reader:
         subsumptions_test.append((row[0], row[1]))
 
-kmeans = pickle.load(open('kmeans.pickle', 'rb'))
-print('The number of clusters is %d.' % (kmeans.n_clusters))
+for path in sys.argv[1:]:
+    print('Doing "%s".' % path, flush=True)
 
-clusters_train = kmeans.predict(Y_all_train - X_all_train)
-clusters_test  = kmeans.predict(Y_all_test  - X_all_test)
+    kmeans = pickle.load(open(os.path.join(path, 'kmeans.pickle'), 'rb'))
+    print('The number of clusters is %d.' % (kmeans.n_clusters), flush=True)
 
-W = [None] * kmeans.n_clusters
+    for model in MODELS:
+        clusters_train = kmeans.predict(Y_all_train - X_all_train)
+        clusters_test  = kmeans.predict(Y_all_test  - X_all_test)
 
-CLUSTER_REGEXP = re.compile('W-(?P<cluster>\d+)\.txt$')
+        W = [None] * kmeans.n_clusters
 
-for path in glob.glob('%s.W-*.txt' % (MODEL)):
-    cluster = int(CLUSTER_REGEXP.search(path).group('cluster')) - 1
-    print('Loading "%s" as the cluster %d.' % (path, cluster))
-    W[cluster] = np.loadtxt(path)
+        CLUSTER_REGEXP = re.compile('W-(?P<cluster>\d+)\.txt$')
 
-def cosine(v1, v2):
-    similarity = np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
-    return 0. if np.isnan(similarity) else similarity
+        for model_path in glob.glob('%s/%s.W-*.txt' % (path, model)):
+            cluster = int(CLUSTER_REGEXP.search(model_path).group('cluster')) - 1
+            print('Loading "%s" as the cluster %d.' % (model_path, cluster), flush=True)
+            W[cluster] = np.loadtxt(model_path)
 
-measures1, measures5, measures10 = {}, {}, {}
+        measures = [{} for _ in range(0, 10)]
+        cache = defaultdict(lambda: {})
 
-for i, (hyponym, hypernym) in enumerate(subsumptions_test):
-    cluster   = clusters_test[i]
+        for i, (hyponym, hypernym) in enumerate(subsumptions_test):
+            cluster   = clusters_test[i]
 
-    x_example        = np.ones((1, X_all_test.shape[1] + 1))
-    x_example[:, 1:] = X_all_test[i]
-    y_example        = Y_all_test[i]
-    y_hat            = x_example.dot(W[cluster]).reshape(X_all_test.shape[1],)
+            if hyponym not in cache[cluster]:
+                X_example = np.ones((1, X_all_test.shape[1] + 1))
+                X_example[:, 1:] = w2v[hyponym]
+                Y_example = X_example.dot(W[cluster]).reshape(X_all_test.shape[1],)
+                cache[cluster][hyponym] = [w for w, _ in w2v.most_similar(positive=[Y_example], topn=10)]
 
-    cosine_hat = cosine(y_example, y_hat)
+            actual  = cache[cluster][hyponym]
 
-    measures1[(hyponym, hypernym)]  = 1. if cosine_hat > c1_test  else 0.
-    measures5[(hyponym, hypernym)]  = 1. if cosine_hat > c5_test  else 0.
-    measures10[(hyponym, hypernym)] = 1. if cosine_hat > c10_test else 0.
+            for j in range(0, len(measures)):
+                measures[j][(hyponym, hypernym)] = 1. if hypernym in actual[:j + 1] else 0.
 
-    if (i + 1) % 1000 == 0:
-        print('%d examples out of %d done for "%s": A@1 is %.6f, A@5 is %.6f and A@10 is %.6f.' % (i + 1,
-            len(subsumptions_test), MODEL,
-            sum(measures1.values())  / len(subsumptions_test),
-            sum(measures5.values())  / len(subsumptions_test),
-            sum(measures10.values()) / len(subsumptions_test)), file=sys.stderr)
+            if (i + 1) % 100 == 0:
+                print('%d examples out of %d done for "%s/%s": %s.' % (i + 1,
+                    len(subsumptions_test), path, model,
+                    ', '.join(['@%d=%.6f' % (i + 1, sum(measures[i].values()) / len(subsumptions_test)) for i in range(len(measures))])),
+                    file=sys.stderr, flush=True)
 
-print('Overall A@1 is %.4f, A@5 is %.4f and A@10 is %.4f.' % (
-    sum(measures1.values())  / len(subsumptions_test),
-    sum(measures5.values())  / len(subsumptions_test),
-    sum(measures10.values()) / len(subsumptions_test)))
+        print('For "%s/%s": overall %s.' % (
+            path, model,
+            ', '.join(['@%d=%.4f' % (i + 1, sum(measures[i].values()) / len(subsumptions_test)) for i in range(len(measures))])),
+            flush=True)
