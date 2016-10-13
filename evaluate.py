@@ -78,10 +78,10 @@ for path in sys.argv[1:]:
             if (i + 1) % 100 == 0:
                 print('%d examples out of %d done for "%s/%s": %s.' % (i + 1,
                     len(subsumptions_test), path, model,
-                    ', '.join(['@%d=%.6f' % (i + 1, sum(measures[i].values()) / len(subsumptions_test)) for i in range(len(measures))])),
+                    ', '.join(['A@%d=%.6f' % (i + 1, sum(measures[i].values()) / len(subsumptions_test)) for i in range(len(measures))])),
                     file=sys.stderr, flush=True)
 
         print('For "%s/%s": overall %s.' % (
             path, model,
-            ', '.join(['@%d=%.4f' % (i + 1, sum(measures[i].values()) / len(subsumptions_test)) for i in range(len(measures))])),
+            ', '.join(['A@%d=%.4f' % (i + 1, sum(measures[i].values()) / len(subsumptions_test)) for i in range(len(measures))])),
             flush=True)
