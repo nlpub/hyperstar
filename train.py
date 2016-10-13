@@ -7,13 +7,7 @@ import pickle
 import random
 import numpy as np
 import tensorflow as tf
-
-from projlearn import Data, \
-    Baseline,          BaselineCosine, \
-    NegativeFrobenius, NegativeFrobeniusCosine, \
-    NegativeHyponym,   NegativeHyponymCosine, \
-    NegativeSynonym,   NegativeSynonymCosine, \
-    PositiveHypernym,  PositiveHypernymCosine
+from projlearn import *
 
 flags = tf.app.flags
 FLAGS = flags.FLAGS
@@ -34,7 +28,9 @@ MODELS = {
     'negative_hyponym':          NegativeHyponym,
     'negative_hyponym_cosine':   NegativeHyponymCosine,
     'negative_synonym':          NegativeSynonym,
-    'negative_synonym_cosine':   NegativeSynonymCosine
+    'negative_synonym_cosine':   NegativeSynonymCosine,
+    'regularized_hyponym':       RegularizedHyponym,
+    'regularized_synonym':       RegularizedSynonym
 }
 
 def train(config, model, data):
