@@ -101,16 +101,10 @@ Y_all_train = np.array([w2v[w] for _, w in subsumptions_train])
 X_all_test  = np.array([w2v[w] for w, _ in subsumptions_test])
 Y_all_test  = np.array([w2v[w] for _, w in subsumptions_test])
 
-C1_all_train, C5_all_train, C10_all_train = [], [], []
 Z_index_train, Z_all_train = [], []
 
 for hyponym, hypernym in subsumptions_train:
     y_example = w2v[hypernym]
-    neighbours = [(w, w2v[w]) for w, _ in w2v.most_similar(positive=[y_example], topn=10 + 1) if w != hypernym]
-
-    C1_all_train.append(cosine(y_example,  neighbours[0][1]))
-    C5_all_train.append(cosine(y_example,  neighbours[4][1]))
-    C10_all_train.append(cosine(y_example, neighbours[9][1]))
 
     word_synonyms = synonyms[hyponym] if len(synonyms[hyponym]) > 0 else [hyponym]
     Z_index_train.append([len(Z_all_train), len(word_synonyms)])
@@ -120,16 +114,10 @@ for hyponym, hypernym in subsumptions_train:
 Z_index_train = np.array(Z_index_train, dtype='int32')
 Z_all_train = np.array(Z_all_train)
 
-C1_all_test, C5_all_test, C10_all_test = [], [], []
 Z_index_test, Z_all_test = [], []
 
 for hyponym, hypernym in subsumptions_test:
     y_example = w2v[hypernym]
-    neighbours = [(w, w2v[w]) for w, _ in w2v.most_similar(positive=[y_example], topn=10 + 1) if w != hypernym]
-
-    C1_all_test.append(cosine(y_example,  neighbours[0][1]))
-    C5_all_test.append(cosine(y_example,  neighbours[4][1]))
-    C10_all_test.append(cosine(y_example, neighbours[9][1]))
 
     word_synonyms = synonyms[hyponym] if len(synonyms[hyponym]) > 0 else [hyponym]
     Z_index_test.append([len(Z_all_test), len(word_synonyms)])
@@ -142,24 +130,12 @@ Z_all_test = np.array(Z_all_test)
 np.savez_compressed('train.npz', X_all_train=X_all_train,
                                  Y_all_train=Y_all_train,
                                  Z_index_train=Z_index_train,
-                                 Z_all_train=Z_all_train,
-                                 C1_all_train=np.array(C1_all_train),
-                                 C5_all_train=np.array(C5_all_train),
-                                 C10_all_train=np.array(C10_all_train),
-                                 cd1_train=np.array([np.mean(C1_all_train),   np.std(C1_all_train)]),
-                                 cd5_train=np.array([np.mean(C5_all_train),   np.std(C5_all_train)]),
-                                 cd10_train=np.array([np.mean(C10_all_train), np.std(C10_all_train)]))
+                                 Z_all_train=Z_all_train)
 
 np.savez_compressed('test.npz',  X_all_test=X_all_test,
                                  Y_all_test=Y_all_test,
                                  Z_index_test=Z_index_test,
-                                 Z_all_test=Z_all_test,
-                                 C1_all_test=np.array(C1_all_test),
-                                 C5_all_test=np.array(C5_all_test),
-                                 C10_all_test=np.array(C10_all_test),
-                                 cd1_test=np.array([np.mean(C1_all_test),   np.std(C1_all_test)]),
-                                 cd5_test=np.array([np.mean(C5_all_test),   np.std(C5_all_test)]),
-                                 cd10_test=np.array([np.mean(C10_all_test), np.std(C10_all_test)]))
+                                 Z_all_test=Z_all_test)
 
 print('I have %d train examples and %d test examples.' % (X_all_train.shape[0], X_all_test.shape[0]))
 print('Also, I have %d train synonyms and %d test synonyms.' % (Z_all_train.shape[0], Z_all_test.shape[0]))
