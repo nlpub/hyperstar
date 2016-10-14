@@ -65,8 +65,8 @@ for path in sys.argv[1:]:
             print('Loading "%s" as the cluster %d.' % (model_path, cluster), flush=True)
             W[cluster] = np.loadtxt(model_path)
 
-        if None in W:
-            print('Missing the matrices for the model "%s"!' % model, flush=True)
+        if not all(W):
+            print('Missing the matrices for the model "%s"!' % model, file=sys.stderr, flush=True)
             continue
 
         measures = [{} for _ in range(0, 10)]
