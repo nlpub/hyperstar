@@ -99,7 +99,7 @@ Z_index_train, Z_all_train = [], []
 
 for hyponym, hypernym in subsumptions_train:
     x_index       = len(Z_all_train)
-    word_synonyms = [hyponym, *synonyms[hyponym]]
+    word_synonyms = [hyponym] + synonyms[hyponym]
 
     Z_index_train.append([x_index, len(word_synonyms)])
 
@@ -113,7 +113,7 @@ Z_index_test, Z_all_test = [], []
 
 for hyponym, hypernym in subsumptions_test:
     x_index       = len(Z_all_test)
-    word_synonyms = [hyponym, *synonyms[hyponym]]
+    word_synonyms = [hyponym] + synonyms[hyponym]
 
     Z_index_test.append([x_index, len(word_synonyms)])
 
