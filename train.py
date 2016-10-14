@@ -19,18 +19,11 @@ flags.DEFINE_integer('batch_size',   512, 'Batch size.')
 flags.DEFINE_boolean('gpu',         True, 'Try using GPU.')
 
 MODELS = {
-    'baseline':                  Baseline,
-    'baseline_cosine':           BaselineCosine,
-    'negative_frobenius':        NegativeFrobenius,
-    'negative_frobenius_cosine': NegativeFrobeniusCosine,
-    'positive_hypernym':         PositiveHypernym,
-    'positive_hypernym_cosine':  PositiveHypernymCosine,
-    'negative_hyponym':          NegativeHyponym,
-    'negative_hyponym_cosine':   NegativeHyponymCosine,
-    'negative_synonym':          NegativeSynonym,
-    'negative_synonym_cosine':   NegativeSynonymCosine,
-    'regularized_hyponym':       RegularizedHyponym,
-    'regularized_synonym':       RegularizedSynonym
+    'baseline':              Baseline,
+    'regularized_frobenius': RegularizedFrobenius,
+    'regularized_hyponym':   RegularizedHyponym,
+    'regularized_synonym':   RegularizedSynonym,
+    'regularized_hypernym':  RegularizedHypernym
 }
 
 def train(config, model, data):
