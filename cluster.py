@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import argparse
 import csv
 import operator
 import pickle
@@ -10,27 +11,26 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 from multiprocessing import Pool
 
-RANDOM_SEED = 228
+parser = argparse.ArgumentParser(description='Evaluation.')
+parser.add_argument('--train', default='train.npz', nargs='?', help='Path to the training set.')
+parser.add_argument('--seed',  default=228, type=int, nargs='?', help='Random seed.')
+parser.add_argument('-k',      type=int, nargs='?', help='Number of clusters.')
+args = vars(parser.parse_args())
+
+RANDOM_SEED = args['seed']
 random.seed(RANDOM_SEED)
 
-with np.load('train.npz') as npz:
-    Y_all_train   = npz['Y_all_train']
-    Z_index_train = npz['Z_index_train']
-    Z_all_train   = npz['Z_all_train']
-
-with np.load('test.npz') as npz:
-    Y_all_test    = npz['Y_all_test']
-    Z_index_test  = npz['Z_index_test']
-    Z_all_test    = npz['Z_all_test']
+with np.load(args['train']) as npz:
+    Y_all_train   = npz['Y_all']
+    Z_index_train = npz['Z_index']
+    Z_all_train   = npz['Z_all']
 
 X_all_train = Z_all_train[Z_index_train[:, 0], :]
-X_all_test  = Z_all_test[Z_index_test[:, 0],   :]
 
 train_offsets = Y_all_train - X_all_train
-test_offsets  = Y_all_test  - X_all_test
 
-if len(sys.argv) == 2:
-    km = KMeans(n_clusters=int(sys.argv[1]), n_jobs=-1, random_state=RANDOM_SEED)
+if args['k']:
+    km = KMeans(n_clusters=args['k'], n_jobs=-1, random_state=RANDOM_SEED)
     km.fit_predict(train_offsets)
     pickle.dump(km, open('kmeans.pickle', 'wb'))
     print('Just written the k-means result for k=%d.' % (km.n_clusters))

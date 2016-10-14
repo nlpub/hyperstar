@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
+import argparse
 import csv
 import glob
 import os
 import pickle
-import random
 import re
 import sys
 from gensim.models.word2vec import Word2Vec
@@ -12,10 +12,15 @@ from collections import defaultdict
 import numpy as np
 from sklearn.cluster import KMeans
 
-RANDOM_SEED = 228
-random.seed(RANDOM_SEED)
-
 MODELS = ['baseline', 'regularized_frobenius', 'regularized_hyponym', 'regularized_synonym', 'regularized_hypernym']
+
+parser = argparse.ArgumentParser(description='Evaluation.')
+parser.add_argument('--w2v',          default='all.norm-sz100-w10-cb0-it1-min100.w2v', nargs='?', help='Path to the word2vec model.')
+parser.add_argument('--train',        default='train.npz',             nargs='?', help='Path to the training set.')
+parser.add_argument('--test',         default='test.npz',              nargs='?', help='Path to the test set.')
+parser.add_argument('--subsumptions', default='subsumptions-test.txt', nargs='?', help='Path to the test subsumptions.')
+parser.add_argument('path', nargs='*', help='List of the directories with results.')
+args = vars(parser.parse_args())
 
 if not len(sys.argv) > 1:
     print('Usage: %s path...' % (sys.argv[0]), file=sys.stderr)
@@ -23,25 +28,19 @@ if not len(sys.argv) > 1:
 
 WD = os.path.dirname(os.path.realpath(__file__))
 
-w2v = Word2Vec.load_word2vec_format(os.path.join(WD, 'all.norm-sz100-w10-cb0-it1-min100.w2v'), binary=True, unicode_errors='ignore')
+w2v = Word2Vec.load_word2vec_format(os.path.join(WD, args['w2v']), binary=True, unicode_errors='ignore')
 w2v.init_sims(replace=True)
 
-with np.load('train.npz') as npz:
-    Y_all_train   = npz['Y_all_train']
-    Z_index_train = npz['Z_index_train']
-    Z_all_train   = npz['Z_all_train']
+with np.load(args['test']) as npz:
+    Y_all_test    = npz['Y_all']
+    Z_index_test  = npz['Z_index']
+    Z_all_test    = npz['Z_all']
 
-with np.load('test.npz') as npz:
-    Y_all_test    = npz['Y_all_test']
-    Z_index_test  = npz['Z_index_test']
-    Z_all_test    = npz['Z_all_test']
-
-X_all_train = Z_all_train[Z_index_train[:, 0], :]
 X_all_test  = Z_all_test[Z_index_test[:, 0],   :]
 
 subsumptions_test = []
 
-with open('subsumptions-test.txt') as f:
+with open(args['subsumptions']) as f:
     reader = csv.reader(f, delimiter='\t', quoting=csv.QUOTE_NONE)
     for row in reader:
         subsumptions_test.append((row[0], row[1]))
@@ -52,15 +51,14 @@ def compute_ats(measures):
 def compute_auc(ats):
     return sum([ats[j] + ats[j + 1] for j in range(0, len(ats) - 1)]) / 2 / 10
 
-for path in sys.argv[1:]:
-    print('Doing "%s".' % path, flush=True)
+for path in args['path']:
+    print('Doing "%s" on "%s" and "%s".' % (path, args['test'], args['subsumptions']), flush=True)
 
     kmeans = pickle.load(open(os.path.join(path, 'kmeans.pickle'), 'rb'))
     print('The number of clusters is %d.' % (kmeans.n_clusters), flush=True)
 
     for model in MODELS:
-        clusters_train = kmeans.predict(Y_all_train - X_all_train)
-        clusters_test  = kmeans.predict(Y_all_test  - X_all_test)
+        clusters_test  = kmeans.predict(Y_all_test - X_all_test)
 
         W = [None] * kmeans.n_clusters
 
@@ -71,7 +69,7 @@ for path in sys.argv[1:]:
             print('Loading "%s" as the cluster %d.' % (model_path, cluster), flush=True)
             W[cluster] = np.loadtxt(model_path)
 
-        if not all(W):
+        if any(w is None for w in W):
             print('Missing the matrices for the model "%s"!' % model, file=sys.stderr, flush=True)
             continue
 

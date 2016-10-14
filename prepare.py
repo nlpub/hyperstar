@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import argparse
 import csv
 import random
 from collections import defaultdict
@@ -7,13 +8,17 @@ from gensim.models.word2vec import Word2Vec
 import numpy as np
 from sklearn.cross_validation import train_test_split
 
-RANDOM_SEED = 228
+parser = argparse.ArgumentParser(description='Evaluation.')
+parser.add_argument('--w2v',  default='all.norm-sz100-w10-cb0-it1-min100.w2v', nargs='?', help='Path to the word2vec model.')
+parser.add_argument('--seed', default=228, type=int, nargs='?', help='Random seed.')
+args = vars(parser.parse_args())
+
+RANDOM_SEED = args['seed']
 random.seed(RANDOM_SEED)
 
-w2v = Word2Vec.load_word2vec_format('all.norm-sz100-w10-cb0-it1-min100.w2v', binary=True, unicode_errors='ignore')
+w2v = Word2Vec.load_word2vec_format(args['w2v'], binary=True, unicode_errors='ignore')
 w2v.init_sims(replace=True)
-e_size = w2v.layer1_size
-print('Using %d word2vec dimensions.' % e_size)
+print('Using %d word2vec dimensions from "%s".' % (w2v.layer1_size, args['w2v']))
 
 hypernyms_patterns   = defaultdict(lambda: list())
 hypernyms_wiktionary = defaultdict(lambda: list())
@@ -50,16 +55,10 @@ with open('all_ru_pairs_ruwikt20160210_parsed.txt') as f:
 
 keys_wiktionary = [k for k in hypernyms_wiktionary.keys() if len(hypernyms_wiktionary[k]) > 0]
 
-WI_train, WI_test = train_test_split(
-    np.arange(len(keys_wiktionary), dtype='int32'),
-    test_size=.33,
-    random_state=RANDOM_SEED)
+wiktionary_train, wiktionary_validation_test = train_test_split(np.arange(len(keys_wiktionary), dtype='int32'), test_size=.4, random_state=RANDOM_SEED)
+wiktionary_validation, wiktionary_test = train_test_split(wiktionary_validation_test, test_size=.5, random_state=RANDOM_SEED)
 
-hypernyms_train = {}
-
-for i in WI_train:
-    k = keys_wiktionary[i]
-    hypernyms_train[k] = hypernyms_wiktionary[k]
+hypernyms_train = {k: hypernyms_wiktionary[k] for i in wiktionary_train for k in (keys_wiktionary[i],)}
 
 for hyponym, hypernyms in hypernyms_patterns.items():
     if hyponym in hypernyms_train:
@@ -67,72 +66,65 @@ for hyponym, hypernyms in hypernyms_patterns.items():
             if not hypernym in hypernyms_train[hyponym]:
                 hypernyms_train[hyponym].append(hypernym)
 
-hypernyms_test  = {}
+hypernyms_validation = {k: hypernyms_wiktionary[k] for i in wiktionary_validation for k in (keys_wiktionary[i],)}
+hypernyms_test       = {k: hypernyms_wiktionary[k] for i in wiktionary_test       for k in (keys_wiktionary[i],)}
 
-for i in WI_test:
-    k = keys_wiktionary[i]
-    hypernyms_test[k] = hypernyms_wiktionary[k]
+subsumptions_train      = [(x, y) for x, ys in hypernyms_train.items()      for y in ys]
+subsumptions_validation = [(x, y) for x, ys in hypernyms_validation.items() for y in ys]
+subsumptions_test       = [(x, y) for x, ys in hypernyms_test.items()       for y in ys]
 
-subsumptions_train = [(x, y) for x, ys in hypernyms_train.items() for y in ys]
-subsumptions_test  = [(x, y) for x, ys in hypernyms_test.items()  for y in ys]
+def write_subsumptions(subsumptions, filename):
+    with open(filename, 'w', newline='') as f:
+        writer = csv.writer(f, dialect='excel-tab', lineterminator='\n')
+        for pair in subsumptions:
+            writer.writerow(pair)
 
-with open('subsumptions-train.txt', 'w', newline='') as f:
-    writer = csv.writer(f, dialect='excel-tab', lineterminator='\n')
-    for pair in subsumptions_train:
-        writer.writerow(pair)
-
-with open('subsumptions-test.txt', 'w', newline='') as f:
-    writer = csv.writer(f, dialect='excel-tab', lineterminator='\n')
-    for pair in subsumptions_test:
-        writer.writerow(pair)
+write_subsumptions(subsumptions_train,      'subsumptions-train.txt')
+write_subsumptions(subsumptions_validation, 'subsumptions-validation.txt')
+write_subsumptions(subsumptions_test,       'subsumptions-test.txt')
 
 with open('synonyms.txt', 'w', newline='') as f:
     writer = csv.writer(f, dialect='excel-tab', lineterminator='\n')
     for word, words in synonyms.items():
         writer.writerow((word, ','.join(words)))
 
-def cosine(v1, v2):
-    similarity = np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
-    return 0. if np.isnan(similarity) else similarity
+def compute_Z(subsumptions):
+    Z_index, Z_all = [], []
 
-Z_index_train, Z_all_train = [], []
+    for hyponym, hypernym in subsumptions:
+        x_index       = len(Z_all)
+        word_synonyms = [hyponym] + synonyms[hyponym]
 
-for hyponym, hypernym in subsumptions_train:
-    x_index       = len(Z_all_train)
-    word_synonyms = [hyponym] + synonyms[hyponym]
+        Z_index.append([x_index, len(word_synonyms)])
 
-    Z_index_train.append([x_index, len(word_synonyms)])
+        for synonym in word_synonyms:
+            Z_all.append(w2v[synonym])
 
-    for synonym in word_synonyms:
-        Z_all_train.append(w2v[synonym])
+    return (np.array(Z_index, dtype='int32'), np.array(Z_all))
 
-Z_index_train = np.array(Z_index_train, dtype='int32')
-Z_all_train = np.array(Z_all_train)
+Z_index_train,      Z_all_train      = compute_Z(subsumptions_train)
+Z_index_validation, Z_all_validation = compute_Z(subsumptions_validation)
+Z_index_test,       Z_all_test       = compute_Z(subsumptions_test)
 
-Z_index_test, Z_all_test = [], []
+Y_all_train      = np.array([w2v[w] for _, w in subsumptions_train])
+Y_all_validation = np.array([w2v[w] for _, w in subsumptions_validation])
+Y_all_test       = np.array([w2v[w] for _, w in subsumptions_test])
 
-for hyponym, hypernym in subsumptions_test:
-    x_index       = len(Z_all_test)
-    word_synonyms = [hyponym] + synonyms[hyponym]
+np.savez_compressed('train.npz',      Y_all=Y_all_train,
+                                      Z_index=Z_index_train,
+                                      Z_all=Z_all_train)
 
-    Z_index_test.append([x_index, len(word_synonyms)])
+np.savez_compressed('validation.npz', Y_all=Y_all_validation,
+                                      Z_index=Z_index_validation,
+                                      Z_all=Z_all_validation)
 
-    for synonym in word_synonyms:
-        Z_all_test.append(w2v[synonym])
+np.savez_compressed('test.npz',       Y_all=Y_all_test,
+                                      Z_index=Z_index_test,
+                                      Z_all=Z_all_test)
 
-Z_index_test = np.array(Z_index_test, dtype='int32')
-Z_all_test = np.array(Z_all_test)
-
-Y_all_train = np.array([w2v[w] for _, w in subsumptions_train])
-Y_all_test  = np.array([w2v[w] for _, w in subsumptions_test])
-
-np.savez_compressed('train.npz', Y_all_train=Y_all_train,
-                                 Z_index_train=Z_index_train,
-                                 Z_all_train=Z_all_train)
-
-np.savez_compressed('test.npz',  Y_all_test=Y_all_test,
-                                 Z_index_test=Z_index_test,
-                                 Z_all_test=Z_all_test)
-
-print('I have %d train examples and %d test examples.' % (Y_all_train.shape[0], Y_all_test.shape[0]))
-print('Also, I have %d train synonyms and %d test synonyms.' % (Z_all_train.shape[0] - Y_all_train.shape[0], Z_all_test.shape[0] - Y_all_test.shape[0]))
+print('I have %d train, %d validation and %d test examples.' % (Y_all_train.shape[0], Y_all_validation.shape[0], Y_all_test.shape[0]))
+print('Also, I have %d train, %d validation and %d test synonyms.' % (
+    Z_all_train.shape[0]      - Y_all_train.shape[0],
+    Z_all_validation.shape[0] - Y_all_validation.shape[0],
+    Z_all_test.shape[0]       - Y_all_test.shape[0])
+)

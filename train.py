@@ -12,12 +12,14 @@ from projlearn import *
 flags = tf.app.flags
 FLAGS = flags.FLAGS
 
-flags.DEFINE_string( 'model', 'baseline', 'Model name.')
-flags.DEFINE_float(  'lambdac',      .10, 'Value of lambda.')
-flags.DEFINE_integer('seed',         228, 'Random seed.')
-flags.DEFINE_integer('num_epochs',  8000, 'Number of training epochs.')
-flags.DEFINE_integer('batch_size',   512, 'Batch size.')
-flags.DEFINE_boolean('gpu',         True, 'Try using GPU.')
+flags.DEFINE_string( 'model',  'baseline', 'Model name.')
+flags.DEFINE_string( 'train', 'train.npz', 'Training set.')
+flags.DEFINE_string( 'test',   'test.npz', 'Test set.')
+flags.DEFINE_float(  'lambdac',       .10, 'Value of lambda.')
+flags.DEFINE_integer('seed',          228, 'Random seed.')
+flags.DEFINE_integer('num_epochs',   8000, 'Number of training epochs.')
+flags.DEFINE_integer('batch_size',    512, 'Batch size.')
+flags.DEFINE_boolean('gpu',          True, 'Try using GPU.')
 
 MODELS = {
     'baseline':              Baseline,
@@ -79,15 +81,15 @@ def main(_):
 
     config = tf.ConfigProto() if FLAGS.gpu else tf.ConfigProto(device_count={'GPU': 0})
 
-    with np.load('train.npz') as npz:
-        Y_all_train   = npz['Y_all_train']
-        Z_index_train = npz['Z_index_train']
-        Z_all_train   = npz['Z_all_train']
+    with np.load(FLAGS.train) as npz:
+        Y_all_train   = npz['Y_all']
+        Z_index_train = npz['Z_index']
+        Z_all_train   = npz['Z_all']
 
-    with np.load('test.npz') as npz:
-        Y_all_test    = npz['Y_all_test']
-        Z_index_test  = npz['Z_index_test']
-        Z_all_test    = npz['Z_all_test']
+    with np.load(FLAGS.test) as npz:
+        Y_all_test    = npz['Y_all']
+        Z_index_test  = npz['Z_index']
+        Z_all_test    = npz['Z_all']
 
     X_all_train = Z_all_train[Z_index_train[:, 0], :]
     X_all_test  = Z_all_test[Z_index_test[:, 0],   :]

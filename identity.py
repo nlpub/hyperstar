@@ -1,27 +1,30 @@
 #!/usr/bin/env python
 
+import argparse
 import csv
-import random
 import sys
 from gensim.models.word2vec import Word2Vec
 import numpy as np
 
-RANDOM_SEED = 228
-random.seed(RANDOM_SEED)
+parser = argparse.ArgumentParser(description='Evaluation.')
+parser.add_argument('--w2v',          default='all.norm-sz100-w10-cb0-it1-min100.w2v', nargs='?', help='Path to the word2vec model.')
+parser.add_argument('--test',         default='test.npz',              nargs='?', help='Path to the test set.')
+parser.add_argument('--subsumptions', default='subsumptions-test.txt', nargs='?', help='Path to the test subsumptions.')
+args = vars(parser.parse_args())
 
-w2v = Word2Vec.load_word2vec_format('all.norm-sz100-w10-cb0-it1-min100.w2v', binary=True, unicode_errors='ignore')
+w2v = Word2Vec.load_word2vec_format(args['w2v'], binary=True, unicode_errors='ignore')
 w2v.init_sims(replace=True)
 
-with np.load('test.npz') as npz:
-    Y_all_test    = npz['Y_all_test']
-    Z_index_test  = npz['Z_index_test']
-    Z_all_test    = npz['Z_all_test']
+with np.load(args['test']) as npz:
+    Y_all_test    = npz['Y_all']
+    Z_index_test  = npz['Z_index']
+    Z_all_test    = npz['Z_all']
 
 X_all_test  = Z_all_test[Z_index_test[:, 0], :]
 
 subsumptions_test = []
 
-with open('subsumptions-test.txt') as f:
+with open(args['subsumptions']) as f:
     reader = csv.reader(f, delimiter='\t', quoting=csv.QUOTE_NONE)
     for row in reader:
         subsumptions_test.append((row[0], row[1]))
