@@ -13,11 +13,18 @@ from multiprocessing import Pool
 RANDOM_SEED = 228
 random.seed(RANDOM_SEED)
 
-with np.load('train.npz') as data:
-    X_all_train, Y_all_train = data['X_all_train'], data['Y_all_train']
+with np.load('train.npz') as npz:
+    Y_all_train   = npz['Y_all_train']
+    Z_index_train = npz['Z_index_train']
+    Z_all_train   = npz['Z_all_train']
 
-with np.load('test.npz') as data:
-    X_all_test, Y_all_test = data['X_all_test'], data['Y_all_test']
+with np.load('test.npz') as npz:
+    Y_all_test    = npz['Y_all_test']
+    Z_index_test  = npz['Z_index_test']
+    Z_all_test    = npz['Z_all_test']
+
+X_all_train = Z_all_train[Z_index_train[:, 0], :]
+X_all_test  = Z_all_test[Z_index_test[:, 0],   :]
 
 train_offsets = Y_all_train - X_all_train
 test_offsets  = Y_all_test  - X_all_test

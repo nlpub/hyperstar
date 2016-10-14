@@ -12,8 +12,12 @@ random.seed(RANDOM_SEED)
 w2v = Word2Vec.load_word2vec_format('all.norm-sz100-w10-cb0-it1-min100.w2v', binary=True, unicode_errors='ignore')
 w2v.init_sims(replace=True)
 
-with np.load('test.npz') as data:
-    X_all_test, Y_all_test = data['X_all_test'], data['Y_all_test']
+with np.load('test.npz') as npz:
+    Y_all_test    = npz['Y_all_test']
+    Z_index_test  = npz['Z_index_test']
+    Z_all_test    = npz['Z_all_test']
+
+X_all_test  = Z_all_test[Z_index_test[:, 0], :]
 
 subsumptions_test = []
 

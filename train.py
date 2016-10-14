@@ -79,12 +79,17 @@ def main(_):
     config = tf.ConfigProto() if FLAGS.gpu else tf.ConfigProto(device_count={'GPU': 0})
 
     with np.load('train.npz') as npz:
-        X_all_train,   Y_all_train = npz['X_all_train'],   npz['Y_all_train']
-        Z_index_train, Z_all_train = npz['Z_index_train'], npz['Z_all_train']
+        Y_all_train   = npz['Y_all_train']
+        Z_index_train = npz['Z_index_train']
+        Z_all_train   = npz['Z_all_train']
 
     with np.load('test.npz') as npz:
-        X_all_test,   Y_all_test = npz['X_all_test'],   npz['Y_all_test']
-        Z_index_test, Z_all_test = npz['Z_index_test'], npz['Z_all_test']
+        Y_all_test    = npz['Y_all_test']
+        Z_index_test  = npz['Z_index_test']
+        Z_all_test    = npz['Z_all_test']
+
+    X_all_train = Z_all_train[Z_index_train[:, 0], :]
+    X_all_test  = Z_all_test[Z_index_test[:, 0],   :]
 
     kmeans = pickle.load(open('kmeans.pickle', 'rb'))
 
