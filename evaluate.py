@@ -105,7 +105,6 @@ for path in sys.argv[1:]:
                     auc),
                 file=sys.stderr, flush=True)
 
-
         ats = compute_ats(measures)
         auc = compute_auc(ats)
         ats_string = ', '.join(['A@%d=%.4f' % (j + 1, ats[j]) for j in range(len(ats))])
