@@ -15,7 +15,7 @@ from sklearn.cluster import KMeans
 RANDOM_SEED = 228
 random.seed(RANDOM_SEED)
 
-MODELS = ['baseline', 'negative_hyponym', 'negative_synonym', 'positive_hypernym']
+MODELS = ['baseline', 'regularized_frobenius', 'regularized_hyponym', 'regularized_synonym', 'regularized_hypernym']
 
 if not len(sys.argv) > 1:
     print('Usage: %s path...' % (sys.argv[0]), file=sys.stderr)
@@ -65,6 +65,10 @@ for path in sys.argv[1:]:
             print('Loading "%s" as the cluster %d.' % (model_path, cluster), flush=True)
             W[cluster] = np.loadtxt(model_path)
 
+        if None in W:
+            print('Missing the matrices for the model "%s"!' % model, flush=True)
+            continue
+
         measures = [{} for _ in range(0, 10)]
         cache = defaultdict(lambda: {})
 
@@ -83,12 +87,12 @@ for path in sys.argv[1:]:
                 measures[j][(hyponym, hypernym)] = 1. if hypernym in actual[:j + 1] else 0.
 
             if (i + 1) % 100 == 0:
-                print('%d examples out of %d done for "%s/%s": %s.' % (i + 1,
-                    len(subsumptions_test), path, model,
-                    ', '.join(['A@%d=%.6f' % (i + 1, sum(measures[i].values()) / len(subsumptions_test)) for i in range(len(measures))])),
-                    file=sys.stderr, flush=True)
+                ats = [sum(measures[j].values()) / len(subsumptions_test) for j in range(len(measures))]
+                auc = sum([ats[j] + ats[j + 1] for j in range(0, len(ats) - 1)]) / 2 / 10
 
-        print('For "%s/%s": overall %s.' % (
-            path, model,
-            ', '.join(['A@%d=%.4f' % (i + 1, sum(measures[i].values()) / len(subsumptions_test)) for i in range(len(measures))])),
-            flush=True)
+                print('%d examples out of %d done for "%s/%s": %s. AUC=%.6f.' % (i + 1, len(subsumptions_test), path, model, ', '.join(['A@%d=%.6f' % (j + 1, ats[j]) for j in range(len(ats))]), auc), file=sys.stderr, flush=True)
+
+        ats = [sum(measures[j].values()) / len(subsumptions_test) for j in range(len(measures))]
+        auc = sum([ats[j] + ats[j + 1] for j in range(0, len(ats) - 1)]) / 2 / 10
+
+        print('For "%s/%s": overall %s. AUC=%.6f.' % (path, model, ', '.join(['A@%d=%.4f' % (j + 1, ats[j]) for j in range(len(ats))]), auc), flush=True)

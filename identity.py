@@ -35,9 +35,12 @@ for i, (hyponym, hypernym) in enumerate(subsumptions_test):
         measures[j][(hyponym, hypernym)] = 1. if hypernym in actual[:j + 1] else 0.
 
     if (i + 1) % 100 == 0:
-        print('%d examples out of %d done for identity: %s.' % (i + 1,
-            len(subsumptions_test),
-            ', '.join(['@%d=%.6f' % (i + 1, sum(measures[i].values()) / len(subsumptions_test)) for i in range(len(measures))])),
-            file=sys.stderr, flush=True)
+        ats = [sum(measures[j].values()) / len(subsumptions_test) for j in range(len(measures))]
+        auc = sum([ats[j] + ats[j + 1] for j in range(0, len(ats) - 1)]) / 2 / 10
 
-print('For identity: overall %s.' % (', '.join(['@%d=%.4f' % (i + 1, sum(measures[i].values()) / len(subsumptions_test)) for i in range(len(measures))])), flush=True)
+        print('%d examples out of %d done for identity: %s. AUC=%.6f.' % (i + 1, len(subsumptions_test), ', '.join(['A@%d=%.6f' % (j + 1, ats[j]) for j in range(len(ats))]), auc), file=sys.stderr, flush=True)
+
+ats = [sum(measures[j].values()) / len(subsumptions_test) for j in range(len(measures))]
+auc = sum([ats[j] + ats[j + 1] for j in range(0, len(ats) - 1)]) / 2 / 10
+
+print('For identity: overall %s. AUC=%.6f.' % (', '.join(['@%d=%.4f' % (i + 1, sum(measures[i].values()) / len(subsumptions_test)) for i in range(len(measures))]), auc), flush=True)
