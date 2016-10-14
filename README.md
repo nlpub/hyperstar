@@ -51,6 +51,24 @@ After the training, the number of `MODEL.W-k.txt` files being generated represen
 
 The evaluation script has only one parameter: the previously trained model to evaluate. Example: `./evaluate.py path-with-the-trained-model`. It is also possible to study how good (but usually bad) the original embeddings represent the subsumptions. For that, it is simply enough to run `./identity.py`.
 
+When processing the evaluation logs, it is convenient to use `awk` for obtaining the structured data frames.
+
+```awk
+#!/usr/bin/awk -f
+BEGIN {
+    OFS = "\t";
+    print "directory", "model", "A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9", "A10", "AUC";
+}
+/overall/ {
+    match($0, /^For "(.+?)": overall (.+?). AUC=([[:digit:]]+\.[[:digit:]]+).$/, matched);
+    match(matched[1], /^(.+)\/(.+?)$/, path);
+    split(matched[2], ats, ", ");
+    for (i = 1; i <= length(ats); i++) { match(ats[i], /[[:digit:]]+\.[[:digit:]]+$/, value); ats[i] = value[0]; }
+    auc = matched[3];
+    print path[1], path[2], ats[1], ats[1], ats[2], ats[3], ats[4], ats[5], ats[6], ats[7], ats[8], ats[9], ats[10], auc;
+}
+```
+
 ## Copyright
 
 Copyright (c) 2016 [Dmitry Ustalov](https://ustalov.name/en/). See LICENSE for details.
