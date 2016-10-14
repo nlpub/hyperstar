@@ -13,6 +13,7 @@ flags = tf.app.flags
 FLAGS = flags.FLAGS
 
 flags.DEFINE_string( 'model', 'baseline', 'Model name.')
+flags.DEFINE_float(  'lambdac',      .10, 'Value of lambda.')
 flags.DEFINE_integer('seed',         228, 'Random seed.')
 flags.DEFINE_integer('num_epochs',  8000, 'Number of training epochs.')
 flags.DEFINE_integer('batch_size',   512, 'Batch size.')
@@ -96,7 +97,7 @@ def main(_):
     clusters_train = kmeans.predict(Y_all_train - X_all_train)
     clusters_test  = kmeans.predict(Y_all_test  - X_all_test)
 
-    model = MODELS[FLAGS.model](x_size=X_all_train.shape[1], y_size=Y_all_train.shape[1])
+    model = MODELS[FLAGS.model](x_size=X_all_train.shape[1], y_size=Y_all_train.shape[1], lambda_=FLAGS.lambdac)
     print('The model class is %s.' % (type(model).__name__), flush=True)
 
     for path in glob.glob('%s.W-*.txt' % (FLAGS.model)):
