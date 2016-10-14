@@ -95,19 +95,14 @@ def cosine(v1, v2):
     similarity = np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
     return 0. if np.isnan(similarity) else similarity
 
-X_all_train = np.array([w2v[w] for w, _ in subsumptions_train])
-Y_all_train = np.array([w2v[w] for _, w in subsumptions_train])
-
-X_all_test  = np.array([w2v[w] for w, _ in subsumptions_test])
-Y_all_test  = np.array([w2v[w] for _, w in subsumptions_test])
-
 Z_index_train, Z_all_train = [], []
 
 for hyponym, hypernym in subsumptions_train:
-    y_example = w2v[hypernym]
+    x_index       = len(Z_all_train)
+    word_synonyms = [hyponym, *synonyms[hyponym]]
 
-    word_synonyms = synonyms[hyponym] if len(synonyms[hyponym]) > 0 else [hyponym]
-    Z_index_train.append([len(Z_all_train), len(word_synonyms)])
+    Z_index_train.append([x_index, len(word_synonyms)])
+
     for synonym in word_synonyms:
         Z_all_train.append(w2v[synonym])
 
@@ -117,25 +112,27 @@ Z_all_train = np.array(Z_all_train)
 Z_index_test, Z_all_test = [], []
 
 for hyponym, hypernym in subsumptions_test:
-    y_example = w2v[hypernym]
+    x_index       = len(Z_all_test)
+    word_synonyms = [hyponym, *synonyms[hyponym]]
 
-    word_synonyms = synonyms[hyponym] if len(synonyms[hyponym]) > 0 else [hyponym]
-    Z_index_test.append([len(Z_all_test), len(word_synonyms)])
+    Z_index_test.append([x_index, len(word_synonyms)])
+
     for synonym in word_synonyms:
         Z_all_test.append(w2v[synonym])
 
 Z_index_test = np.array(Z_index_test, dtype='int32')
 Z_all_test = np.array(Z_all_test)
 
-np.savez_compressed('train.npz', X_all_train=X_all_train,
-                                 Y_all_train=Y_all_train,
+Y_all_train = np.array([w2v[w] for _, w in subsumptions_train])
+Y_all_test  = np.array([w2v[w] for _, w in subsumptions_test])
+
+np.savez_compressed('train.npz', Y_all_train=Y_all_train,
                                  Z_index_train=Z_index_train,
                                  Z_all_train=Z_all_train)
 
-np.savez_compressed('test.npz',  X_all_test=X_all_test,
-                                 Y_all_test=Y_all_test,
+np.savez_compressed('test.npz',  Y_all_test=Y_all_test,
                                  Z_index_test=Z_index_test,
                                  Z_all_test=Z_all_test)
 
-print('I have %d train examples and %d test examples.' % (X_all_train.shape[0], X_all_test.shape[0]))
-print('Also, I have %d train synonyms and %d test synonyms.' % (Z_all_train.shape[0], Z_all_test.shape[0]))
+print('I have %d train examples and %d test examples.' % (Y_all_train.shape[0], Y_all_test.shape[0]))
+print('Also, I have %d train synonyms and %d test synonyms.' % (Z_all_train.shape[0] - Y_all_train.shape[0], Z_all_test.shape[0] - Y_all_test.shape[0]))
