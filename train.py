@@ -79,7 +79,10 @@ def main(_):
     random.seed(FLAGS.seed)
     tf.set_random_seed(FLAGS.seed)
 
-    config = tf.ConfigProto() if FLAGS.gpu else tf.ConfigProto(device_count={'GPU': 0})
+    if not FLAGS.gpu:
+        os.environ['CUDA_VISIBLE_DEVICES'] = ''
+
+    config = tf.ConfigProto()
 
     with np.load(FLAGS.train) as npz:
         Y_all_train   = npz['Y_all']
