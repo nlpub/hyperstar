@@ -10,13 +10,11 @@ import sys
 from gensim.models.word2vec import Word2Vec
 from collections import defaultdict
 import numpy as np
-from sklearn.cluster import KMeans
 
-MODELS = ['baseline', 'regularized_frobenius', 'regularized_hyponym', 'regularized_synonym', 'regularized_hypernym']
+MODELS = ['baseline', 'regularized_frobenius', 'regularized_hyponym', 'regularized_synonym', 'regularized_hypernym', 'mlp']
 
 parser = argparse.ArgumentParser(description='Evaluation.')
 parser.add_argument('--w2v',          default='all.norm-sz100-w10-cb0-it1-min100.w2v', nargs='?', help='Path to the word2vec model.')
-parser.add_argument('--train',        default='train.npz',             nargs='?', help='Path to the training set.')
 parser.add_argument('--test',         default='test.npz',              nargs='?', help='Path to the test set.')
 parser.add_argument('--subsumptions', default='subsumptions-test.txt', nargs='?', help='Path to the test subsumptions.')
 parser.add_argument('path', nargs='*', help='List of the directories with results.')
@@ -60,18 +58,8 @@ for path in args['path']:
     for model in MODELS:
         clusters_test  = kmeans.predict(Y_all_test - X_all_test)
 
-        W = [None] * kmeans.n_clusters
-
-        CLUSTER_REGEXP = re.compile('W-(?P<cluster>\d+)\.txt$')
-
-        for model_path in glob.glob('%s/%s.W-*.txt' % (path, model)):
-            cluster = int(CLUSTER_REGEXP.search(model_path).group('cluster')) - 1
-            print('Loading "%s" as the cluster %d.' % (model_path, cluster), flush=True)
-            W[cluster] = np.loadtxt(model_path)
-
-        if any(w is None for w in W):
-            print('Missing the matrices for the model "%s"!' % model, file=sys.stderr, flush=True)
-            continue
+        with np.load('%s.test.npz' % model) as npz:
+            Y_hat = {int(cluster): npz[cluster] for cluster in npz.files}
 
         measures = [{} for _ in range(0, 10)]
         cache = defaultdict(lambda: {})
@@ -80,9 +68,7 @@ for path in args['path']:
             cluster   = clusters_test[i]
 
             if hyponym not in cache[cluster]:
-                X_example = np.ones((1, X_all_test.shape[1] + 1))
-                X_example[:, 1:] = w2v[hyponym]
-                Y_example = X_example.dot(W[cluster]).reshape(X_all_test.shape[1],)
+                Y_example = Y_hat[cluster][i].reshape(X_all_test.shape[1],)
                 cache[cluster][hyponym] = [w for w, _ in w2v.most_similar(positive=[Y_example], topn=10)]
 
             actual  = cache[cluster][hyponym]

@@ -18,3 +18,6 @@ class RegularizedHyponym(Baseline):
         self.YY_loss       = tf.nn.l2_loss(self.YY_similarity)
 
         self.loss          = tf.add(self.Y_loss, self.lambda_ * self.YY_loss)
+
+    def __str__(self):
+        return '<%s lambda=%f>' % (self.__class__.__name__, self.lambda_)

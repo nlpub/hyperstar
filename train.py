@@ -3,6 +3,7 @@
 import datetime
 import glob
 import os
+import sys
 import pickle
 import random
 import numpy as np
@@ -26,10 +27,11 @@ MODELS = {
     'regularized_frobenius': RegularizedFrobenius,
     'regularized_hyponym':   RegularizedHyponym,
     'regularized_synonym':   RegularizedSynonym,
-    'regularized_hypernym':  RegularizedHypernym
+    'regularized_hypernym':  RegularizedHypernym,
+    'mlp':                   MLP
 }
 
-def train(config, model, data):
+def train(config, model, data, callback=lambda: None):
     train_op = tf.train.AdamOptimizer(epsilon=1.).minimize(model.loss)
 
     train_losses, test_losses = [], []
@@ -70,10 +72,12 @@ def train(config, model, data):
                 train_losses.append(sess.run(model.loss, feed_dict=feed_dict_train))
                 test_losses.append(sess.run(model.loss, feed_dict=feed_dict_test))
                 print('Cluster %d: step = %05d, train loss = %f, test loss = %f.' % (
-                    data.cluster + 1, step + 1, train_losses[-1], test_losses[-1]), flush=True)
+                    data.cluster + 1, step + 1, train_losses[-1], test_losses[-1]), file=sys.stderr, flush=True)
 
         print('Cluster %d done in %s.' % (data.cluster + 1, str(sum(train_times, datetime.timedelta()))), flush=True)
-        return sess.run(model.W)
+        callback(sess)
+
+        return sess.run(model.Y_hat, feed_dict=feed_dict_test)
 
 def main(_):
     random.seed(FLAGS.seed)
@@ -103,18 +107,27 @@ def main(_):
     clusters_test  = kmeans.predict(Y_all_test  - X_all_test)
 
     model = MODELS[FLAGS.model](x_size=X_all_train.shape[1], y_size=Y_all_train.shape[1], lambda_=FLAGS.lambdac)
-    print('The model class is %s.' % (type(model).__name__), flush=True)
+    print(model, flush=True)
 
     for path in glob.glob('%s.W-*.txt' % (FLAGS.model)):
         print('Removing a stale file: "%s".' % path, flush=True)
         os.remove(path)
 
+    Y_hat_test = {}
+
     for cluster in range(kmeans.n_clusters):
         data = Data(cluster, clusters_train, clusters_test,
                     X_all_train, Y_all_train, Z_index_train, Z_all_train,
                     X_all_test,  Y_all_test,  Z_index_test,  Z_all_test)
-        W    = train(config, model, data)
-        np.savetxt('%s.W-%d.txt' % (FLAGS.model, cluster + 1), W)
+
+        saver = tf.train.Saver()
+        saver_path = '%s.k%d.trained' % (FLAGS.model, cluster + 1)
+        Y_hat_test[str(cluster)] = train(config, model, data, callback=lambda sess: saver.save(sess, saver_path))
+        print('Writing the output model to "%s".' % saver_path, flush=True)
+
+    test_path = '%s.test.npz' % FLAGS.model
+    np.savez_compressed(test_path, **Y_hat_test)
+    print('Writing the test data to "%s".' % test_path)
 
 if __name__ == '__main__':
     tf.app.run()
