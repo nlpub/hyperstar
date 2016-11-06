@@ -16,4 +16,4 @@ class RegularizedHypernym(Baseline):
         self.ZY_error = tf.sub(self.ZY_hat, self.Y)
         self.ZY_loss  = tf.nn.l2_loss(self.ZY_error)
 
-        self.loss     = tf.add(self.Y_loss, self.lambda_ * self.ZY_loss)
+        self.loss     = tf.add(self.Y_loss, self.lambda_ * self.ZY_loss) / tf.to_float(tf.shape(self.X)[0])

@@ -17,7 +17,7 @@ class RegularizedHyponym(Baseline):
         self.YY_similarity = tf.diag_part(tf.matmul(self.X[:, 1:], self.YY_hat, transpose_b=True))
         self.YY_loss       = tf.nn.l2_loss(self.YY_similarity)
 
-        self.loss          = tf.add(self.Y_loss, self.lambda_ * self.YY_loss)
+        self.loss          = tf.add(self.Y_loss, self.lambda_ * self.YY_loss) / tf.to_float(tf.shape(self.X)[0])
 
     def __str__(self):
         return '<%s lambda=%f>' % (self.__class__.__name__, self.lambda_)

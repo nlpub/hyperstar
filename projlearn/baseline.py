@@ -18,7 +18,7 @@ class Baseline:
         self.Y_error = tf.sub(self.Y_hat, self.Y)
         self.Y_loss  = tf.nn.l2_loss(self.Y_error)
 
-        self.loss    = self.Y_loss
+        self.loss    = self.Y_loss / tf.to_float(tf.shape(self.X)[0])
 
     def __str__(self):
         return '<%s>' % self.__class__.__name__
