@@ -13,4 +13,4 @@ class RegularizedFrobenius(Baseline):
 
         self.F_norm = tf.sqrt(tf.trace(tf.matmul(self.W, tf.transpose(self.W))))
 
-        self.loss   = tf.add(self.Y_loss, self.lambda_ * self.F_norm) / tf.to_float(tf.shape(self.X)[0])
+        self.loss   = tf.add(self.Y_loss, self.lambda_ * self.F_norm)

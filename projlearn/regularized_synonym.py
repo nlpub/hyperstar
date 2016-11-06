@@ -12,4 +12,4 @@ class RegularizedSynonym(RegularizedHyponym):
         self.YY_similarity = tf.diag_part(tf.matmul(self.Z[:, 1:], self.YY_hat, transpose_b=True))
         self.YY_loss       = tf.nn.l2_loss(self.YY_similarity)
 
-        self.loss          = tf.add(self.Y_loss, self.lambda_ * self.YY_loss) / tf.to_float(tf.shape(self.X)[0])
+        self.loss          = tf.add(self.Y_loss, self.lambda_ * self.YY_loss)
