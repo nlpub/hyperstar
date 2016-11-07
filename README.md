@@ -34,18 +34,18 @@ The original approach learns a matrix such that transforms an input hyponym embe
 
 ## Training
 
-Before any processing, certain things need to be precomputed, such as training and test sets, etc. For that, the `./prepare.py` script should be executed. On large embeddings, it might take a long time, but it is run only once.
+Before any processing, certain things need to be precomputed, such as training and test sets, etc. For that, the `./dictionary.ru.py` and `./prepare.py` scripts should be executed. On large embeddings, it might take a long time, but it is run only once.
 
-Having the preparation script finished, the vector space should be separated into a number of clusters using the `./cluster.py` script. This is found to be very useful to improving the results, so it is not possible to continue without clustering. Usually, the clustering program automatically estimates the number of clusters using the [silhouette method](https://en.wikipedia.org/wiki/Silhouette_(clustering)), but it is possible to explicitly specify the desired number of clusters, e.g., `./cluster.py 1`.
+Having the preparation script finished, the vector space should be separated into a number of clusters using the `./cluster.py` script. This is found to be very useful to improving the results, so it is not possible to continue without clustering. Usually, the clustering program automatically estimates the number of clusters using the [silhouette method](https://en.wikipedia.org/wiki/Silhouette_(clustering)), but it is possible to explicitly specify the desired number of clusters, e.g., `./cluster.py -k 1`.
 
 The training procedure is implemented in the `./train.py` script. It accepts different parameters:
 
 * `--model=MODEL`, where `MODEL` is the desired model,
 * `--gpu=1` that suggests the program to use a GPU, when possible,
-* `--num_epochs=8000` that specifies the number of training epochs,
-* `--batch_size=512` that specifies the batch size.
+* `--num_epochs=300` that specifies the number of training epochs,
+* `--batch_size=2048` that specifies the batch size.
 
-After the training, the number of `MODEL.W-k.txt` files being generated representing the projection matrix for each `k` cluster.
+After the training, the number of `MODEL.k%d.trained` files being generated representing the trained model for each cluster. Also, the data for evaluation are written into the `MODEL.test.npz` file.
 
 ## Evaluating
 

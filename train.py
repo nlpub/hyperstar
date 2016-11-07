@@ -18,8 +18,8 @@ flags.DEFINE_string( 'train', 'train.npz', 'Training set.')
 flags.DEFINE_string( 'test',   'test.npz', 'Test set.')
 flags.DEFINE_float(  'lambdac',       .10, 'Value of lambda.')
 flags.DEFINE_integer('seed',          228, 'Random seed.')
-flags.DEFINE_integer('num_epochs',   8000, 'Number of training epochs.')
-flags.DEFINE_integer('batch_size',    512, 'Batch size.')
+flags.DEFINE_integer('num_epochs',    300, 'Number of training epochs.')
+flags.DEFINE_integer('batch_size',   2048, 'Batch size.')
 flags.DEFINE_boolean('gpu',          True, 'Try using GPU.')
 
 MODELS = {
@@ -44,37 +44,53 @@ def train(config, model, data, callback=lambda: None):
         feed_dict_train, feed_dict_test = {
             model.X: data.X_train,
             model.Y: data.Y_train,
-            model.Z: data.Z_train()
+            model.Z: data.Z_train
         }, {
             model.X: data.X_test,
             model.Y: data.Y_test,
-            model.Z: data.Z_test()
+            model.Z: data.Z_test
         }
 
-        print('Cluster %d: %d train items and %d test items available.' % (
-            data.cluster + 1, data.X_train.shape[0], data.X_test.shape[0]), flush=True)
+        steps = data.X_train.shape[0] // FLAGS.batch_size
 
-        for step in range(0, FLAGS.num_epochs):
-            batch = np.random.randint(0, data.X_train.shape[0], FLAGS.batch_size)
+        print('Cluster %d: %d train items and %d test items available; using %d steps of %d items.' % (
+            data.cluster + 1,
+            data.X_train.shape[0],
+            data.X_test.shape[0],
+            steps,
+            FLAGS.batch_size),
+        flush=True)
 
-            feed_dict = {
-                model.X: data.X_train[batch, :],
-                model.Y: data.Y_train[batch, :],
-                model.Z: data.Z_train(batch)
-            }
+        for epoch in range(0, FLAGS.num_epochs):
+            for step in range(0, steps):
+                head =  step      * FLAGS.batch_size
+                tail = (step + 1) * FLAGS.batch_size
 
-            t_this = datetime.datetime.now()
-            sess.run(train_op, feed_dict=feed_dict)
-            t_last = datetime.datetime.now()
-            train_times.append(t_last - t_this)
+                feed_dict = {
+                    model.X: data.X_train[head:tail, :],
+                    model.Y: data.Y_train[head:tail, :],
+                    model.Z: data.Z_train[head:tail, :]
+                }
 
-            if (step + 1) % 500 == 0:
+                t_this = datetime.datetime.now()
+                sess.run(train_op, feed_dict=feed_dict)
+                t_last = datetime.datetime.now()
+
+                train_times.append(t_last - t_this)
+
+            if (epoch + 1) % 10 == 0 or (epoch == 0):
                 train_losses.append(sess.run(model.loss, feed_dict=feed_dict_train))
-                test_losses.append(sess.run(model.loss, feed_dict=feed_dict_test))
-                print('Cluster %d: step = %05d, train loss = %f, test loss = %f.' % (
-                    data.cluster + 1, step + 1, train_losses[-1], test_losses[-1]), file=sys.stderr, flush=True)
+                test_losses.append(sess.run(model.loss,  feed_dict=feed_dict_test))
 
-        print('Cluster %d done in %s.' % (data.cluster + 1, str(sum(train_times, datetime.timedelta()))), flush=True)
+                print('Cluster %d: epoch = %05d, train loss = %f, test loss = %f.' % (
+                    data.cluster + 1,
+                    epoch + 1,
+                    train_losses[-1],
+                    test_losses[-1]),
+                file=sys.stderr, flush=True)
+
+        t_delta = sum(train_times, datetime.timedelta())
+        print('Cluster %d done in %s.' % (data.cluster + 1, str(t_delta)), flush=True)
         callback(sess)
 
         return sess.run(model.Y_hat, feed_dict=feed_dict_test)
@@ -89,17 +105,16 @@ def main(_):
     config = tf.ConfigProto()
 
     with np.load(FLAGS.train) as npz:
-        Y_all_train   = npz['Y_all']
-        Z_index_train = npz['Z_index']
-        Z_all_train   = npz['Z_all']
+        XYZ_train     = npz['XYZ']
+        X_all_train   = npz['X_all'][XYZ_train[:, 0], :]
+        Y_all_train   = npz['Y_all'][XYZ_train[:, 1], :]
+        Z_all_train   = npz['X_all'][XYZ_train[:, 2], :]
 
     with np.load(FLAGS.test) as npz:
-        Y_all_test    = npz['Y_all']
-        Z_index_test  = npz['Z_index']
-        Z_all_test    = npz['Z_all']
-
-    X_all_train = Z_all_train[Z_index_train[:, 0], :]
-    X_all_test  = Z_all_test[Z_index_test[:, 0],   :]
+        XYZ_test      = npz['XYZ']
+        X_all_test    = npz['X_all'][XYZ_test[:, 0], :]
+        Y_all_test    = npz['Y_all'][XYZ_test[:, 1], :]
+        Z_all_test    = npz['X_all'][XYZ_test[:, 2], :]
 
     kmeans = pickle.load(open('kmeans.pickle', 'rb'))
 
@@ -116,9 +131,11 @@ def main(_):
     Y_hat_test = {}
 
     for cluster in range(kmeans.n_clusters):
-        data = Data(cluster, clusters_train, clusters_test,
-                    X_all_train, Y_all_train, Z_index_train, Z_all_train,
-                    X_all_test,  Y_all_test,  Z_index_test,  Z_all_test)
+        data = Data(
+            cluster, clusters_train, clusters_test,
+            X_all_train, Y_all_train, Z_all_train,
+            X_all_test,  Y_all_test,  Z_all_test
+        )
 
         saver = tf.train.Saver()
         saver_path = '%s.k%d.trained' % (FLAGS.model, cluster + 1)

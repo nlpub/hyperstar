@@ -30,16 +30,15 @@ w2v = Word2Vec.load_word2vec_format(os.path.join(WD, args['w2v']), binary=True, 
 w2v.init_sims(replace=True)
 
 with np.load(args['test']) as npz:
-    Y_all_test    = npz['Y_all']
-    Z_index_test  = npz['Z_index']
-    Z_all_test    = npz['Z_all']
-
-X_all_test  = Z_all_test[Z_index_test[:, 0],   :]
+    XYZ_test      = npz['XYZ']
+    X_all_test    = npz['X_all'][XYZ_test[:, 0], :]
+    Y_all_test    = npz['Y_all'][XYZ_test[:, 1], :]
 
 subsumptions_test = []
 
 with open(args['subsumptions']) as f:
     reader = csv.reader(f, delimiter='\t', quoting=csv.QUOTE_NONE)
+
     for row in reader:
         subsumptions_test.append((row[0], row[1]))
 

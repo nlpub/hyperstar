@@ -6,21 +6,13 @@ import sys
 from gensim.models.word2vec import Word2Vec
 import numpy as np
 
-parser = argparse.ArgumentParser(description='Evaluation.')
+parser = argparse.ArgumentParser(description='Identity Evaluation.')
 parser.add_argument('--w2v',          default='all.norm-sz100-w10-cb0-it1-min100.w2v', nargs='?', help='Path to the word2vec model.')
-parser.add_argument('--test',         default='test.npz',              nargs='?', help='Path to the test set.')
 parser.add_argument('--subsumptions', default='subsumptions-test.txt', nargs='?', help='Path to the test subsumptions.')
 args = vars(parser.parse_args())
 
 w2v = Word2Vec.load_word2vec_format(args['w2v'], binary=True, unicode_errors='ignore')
 w2v.init_sims(replace=True)
-
-with np.load(args['test']) as npz:
-    Y_all_test    = npz['Y_all']
-    Z_index_test  = npz['Z_index']
-    Z_all_test    = npz['Z_all']
-
-X_all_test  = Z_all_test[Z_index_test[:, 0], :]
 
 subsumptions_test = []
 

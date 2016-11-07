@@ -21,11 +21,9 @@ RANDOM_SEED = args['seed']
 random.seed(RANDOM_SEED)
 
 with np.load(args['train']) as npz:
-    Y_all_train   = npz['Y_all']
-    Z_index_train = npz['Z_index']
-    Z_all_train   = npz['Z_all']
-
-X_all_train = Z_all_train[Z_index_train[:, 0], :]
+    XYZ_train     = npz['XYZ']
+    X_all_train   = npz['X_all'][XYZ_train[:, 0], :]
+    Y_all_train   = npz['Y_all'][XYZ_train[:, 1], :]
 
 train_offsets = Y_all_train - X_all_train
 
