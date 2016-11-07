@@ -57,7 +57,7 @@ When processing the evaluation logs, it is convenient to use `awk` for obtaining
 #!/usr/bin/awk -f
 BEGIN {
     OFS = "\t";
-    print "directory", "model", "A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9", "A10", "AUC";
+    print "directory", "model", "A@1", "A@2", "A@3", "A@4", "A@5", "A@6", "A@7", "A@8", "A@9", "A@10", "AUC";
 }
 /overall/ {
     match($0, /^For "(.+?)": overall (.+?). AUC=([[:digit:]]+\.[[:digit:]]+).$/, matched);
