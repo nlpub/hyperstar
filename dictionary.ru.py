@@ -87,5 +87,3 @@ with open('synonyms.txt', 'w', newline='') as f:
     writer = csv.writer(f, dialect='excel-tab', lineterminator='\n')
     for word, words in synonyms.items():
         writer.writerow((word, ','.join(words)))
-
-# import IPython; IPython.embed()
