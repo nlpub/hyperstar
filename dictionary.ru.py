@@ -74,7 +74,7 @@ subsumptions_validation = [(x, y) for x, ys in hypernyms_validation.items() for 
 subsumptions_test       = [(x, y) for x, ys in hypernyms_test.items()       for y in ys]
 
 def write_subsumptions(subsumptions, filename):
-    with open(filename, 'w', newline='') as f:
+    with open(filename, 'w') as f:
         writer = csv.writer(f, dialect='excel-tab', lineterminator='\n')
         for pair in subsumptions:
             writer.writerow(pair)
@@ -83,7 +83,7 @@ write_subsumptions(subsumptions_train,      'subsumptions-train.txt')
 write_subsumptions(subsumptions_validation, 'subsumptions-validation.txt')
 write_subsumptions(subsumptions_test,       'subsumptions-test.txt')
 
-with open('synonyms.txt', 'w', newline='') as f:
+with open('synonyms.txt', 'w') as f:
     writer = csv.writer(f, dialect='excel-tab', lineterminator='\n')
     for word, words in synonyms.items():
         writer.writerow((word, ','.join(words)))
