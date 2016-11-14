@@ -51,25 +51,27 @@ def train(config, model, data, callback=lambda: None):
             model.Z: data.Z_test
         }
 
-        steps = data.X_train.shape[0] // FLAGS.batch_size
+        steps = max(data.Y_train.shape[0] // FLAGS.batch_size, 1)
 
         print('Cluster %d: %d train items and %d test items available; using %d steps of %d items.' % (
             data.cluster + 1,
             data.X_train.shape[0],
             data.X_test.shape[0],
             steps,
-            FLAGS.batch_size),
+            min(FLAGS.batch_size, data.X_train.shape[0])),
         flush=True)
 
         for epoch in range(0, FLAGS.num_epochs):
+            X, Y, Z = data.train_shuffle()
+
             for step in range(0, steps):
                 head =  step      * FLAGS.batch_size
                 tail = (step + 1) * FLAGS.batch_size
 
                 feed_dict = {
-                    model.X: data.X_train[head:tail, :],
-                    model.Y: data.Y_train[head:tail, :],
-                    model.Z: data.Z_train[head:tail, :]
+                    model.X: X[head:tail, :],
+                    model.Y: Y[head:tail, :],
+                    model.Z: Z[head:tail, :]
                 }
 
                 t_this = datetime.datetime.now()
@@ -85,8 +87,8 @@ def train(config, model, data, callback=lambda: None):
                 print('Cluster %d: epoch = %05d, train loss = %f, test loss = %f.' % (
                     data.cluster + 1,
                     epoch + 1,
-                    train_losses[-1],
-                    test_losses[-1]),
+                    train_losses[-1] / data.X_train.shape[0],
+                    test_losses[-1]  / data.X_test.shape[0]),
                 file=sys.stderr, flush=True)
 
         t_delta = sum(train_times, datetime.timedelta())
@@ -105,23 +107,24 @@ def main(_):
     config = tf.ConfigProto()
 
     with np.load(FLAGS.train) as npz:
-        XYZ_train     = npz['XYZ']
-        X_all_train   = npz['X_all'][XYZ_train[:, 0], :]
-        Y_all_train   = npz['Y_all'][XYZ_train[:, 1], :]
-        Z_all_train   = npz['X_all'][XYZ_train[:, 2], :]
+        X_index_train = npz['X_index']
+        Y_all_train   = npz['Y_all']
+        Z_all_train   = npz['Z_all']
 
     with np.load(FLAGS.test) as npz:
-        XYZ_test      = npz['XYZ']
-        X_all_test    = npz['X_all'][XYZ_test[:, 0], :]
-        Y_all_test    = npz['Y_all'][XYZ_test[:, 1], :]
-        Z_all_test    = npz['X_all'][XYZ_test[:, 2], :]
+        X_index_test  = npz['X_index']
+        Y_all_test    = npz['Y_all']
+        Z_all_test    = npz['Z_all']
+
+    X_all_train = Z_all_train[X_index_train[:, 0], :]
+    X_all_test  = Z_all_test[X_index_test[:, 0],   :]
 
     kmeans = pickle.load(open('kmeans.pickle', 'rb'))
 
     clusters_train = kmeans.predict(Y_all_train - X_all_train)
     clusters_test  = kmeans.predict(Y_all_test  - X_all_test)
 
-    model = MODELS[FLAGS.model](x_size=X_all_train.shape[1], y_size=Y_all_train.shape[1], lambda_=FLAGS.lambdac)
+    model = MODELS[FLAGS.model](x_size=Z_all_train.shape[1], y_size=Y_all_train.shape[1], lambda_=FLAGS.lambdac)
     print(model, flush=True)
 
     for path in glob.glob('%s.W-*.txt' % (FLAGS.model)):
@@ -133,8 +136,8 @@ def main(_):
     for cluster in range(kmeans.n_clusters):
         data = Data(
             cluster, clusters_train, clusters_test,
-            X_all_train, Y_all_train, Z_all_train,
-            X_all_test,  Y_all_test,  Z_all_test
+            X_index_train, Y_all_train, Z_all_train,
+            X_index_test,  Y_all_test,  Z_all_test
         )
 
         saver = tf.train.Saver()

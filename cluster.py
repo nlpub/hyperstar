@@ -11,7 +11,7 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 from multiprocessing import Pool
 
-parser = argparse.ArgumentParser(description='Evaluation.')
+parser = argparse.ArgumentParser(description='Clustering.')
 parser.add_argument('--train', default='train.npz', nargs='?', help='Path to the training set.')
 parser.add_argument('--seed',  default=228, type=int, nargs='?', help='Random seed.')
 parser.add_argument('-k',      type=int, nargs='?', help='Number of clusters.')
@@ -21,9 +21,11 @@ RANDOM_SEED = args['seed']
 random.seed(RANDOM_SEED)
 
 with np.load(args['train']) as npz:
-    XYZ_train     = npz['XYZ']
-    X_all_train   = npz['X_all'][XYZ_train[:, 0], :]
-    Y_all_train   = npz['Y_all'][XYZ_train[:, 1], :]
+    X_index_train = npz['X_index']
+    Y_all_train   = npz['Y_all']
+    Z_all_train   = npz['Z_all']
+
+X_all_train = Z_all_train[X_index_train[:, 0], :]
 
 train_offsets = Y_all_train - X_all_train
 
