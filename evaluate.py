@@ -30,9 +30,11 @@ w2v = Word2Vec.load_word2vec_format(os.path.join(WD, args['w2v']), binary=True, 
 w2v.init_sims(replace=True)
 
 with np.load(args['test']) as npz:
-    XYZ_test      = npz['XYZ']
-    X_all_test    = npz['X_all'][XYZ_test[:, 0], :]
-    Y_all_test    = npz['Y_all'][XYZ_test[:, 1], :]
+    X_index_test  = npz['X_index']
+    Y_all_test    = npz['Y_all']
+    Z_all_test    = npz['Z_all']
+
+X_all_test  = Z_all_test[X_index_test[:, 0],   :]
 
 subsumptions_test = []
 
@@ -41,6 +43,23 @@ with open(args['subsumptions']) as f:
 
     for row in reader:
         subsumptions_test.append((row[0], row[1]))
+
+assert len(subsumptions_test) == X_all_test.shape[0]
+
+def extract(clusters, Y_hat_clusters):
+    cluster_indices = {cluster: 0 for cluster in Y_hat_clusters}
+
+    Y_all_hat = []
+
+    for cluster in clusters:
+        Y_hat = Y_hat_clusters[cluster][cluster_indices[cluster]]
+        cluster_indices[cluster] += 1
+
+        Y_all_hat.append(Y_hat)
+
+    assert sum(cluster_indices.values()) == len(clusters)
+
+    return np.array(Y_all_hat)
 
 def compute_ats(measures):
     return [sum(measures[j].values()) / len(subsumptions_test) for j in range(len(measures))]
@@ -54,23 +73,21 @@ for path in args['path']:
     kmeans = pickle.load(open(os.path.join(path, 'kmeans.pickle'), 'rb'))
     print('The number of clusters is %d.' % (kmeans.n_clusters), flush=True)
 
+    clusters_test  = kmeans.predict(Y_all_test - X_all_test)
+
     for model in MODELS:
-        clusters_test  = kmeans.predict(Y_all_test - X_all_test)
-
         with np.load('%s.test.npz' % model) as npz:
-            Y_hat = {int(cluster): npz[cluster] for cluster in npz.files}
+            Y_hat_clusters = {int(cluster): npz[cluster] for cluster in npz.files}
 
-        measures = [{} for _ in range(0, 10)]
-        cache = defaultdict(lambda: {})
+        Y_all_hat = extract(clusters_test, Y_hat_clusters)
+
+        assert len(subsumptions_test) == Y_all_hat.shape[0]
+
+        measures = [{} for _ in range(10)]
 
         for i, (hyponym, hypernym) in enumerate(subsumptions_test):
-            cluster   = clusters_test[i]
-
-            if hyponym not in cache[cluster]:
-                Y_example = Y_hat[cluster][i].reshape(X_all_test.shape[1],)
-                cache[cluster][hyponym] = [w for w, _ in w2v.most_similar(positive=[Y_example], topn=10)]
-
-            actual  = cache[cluster][hyponym]
+            Y_hat  = Y_all_hat[i].reshape(X_all_test.shape[1],)
+            actual = [w for w, _ in w2v.most_similar(positive=[Y_hat], topn=10)]
 
             for j in range(0, len(measures)):
                 measures[j][(hyponym, hypernym)] = 1. if hypernym in actual[:j + 1] else 0.

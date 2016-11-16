@@ -51,63 +51,42 @@ subsumptions_validation = read_subsumptions('subsumptions-validation.txt')
 subsumptions_test       = read_subsumptions('subsumptions-test.txt')
 synonyms                = read_synonyms('synonyms.txt')
 
-def compute_X(subsumptions, add_synonyms=True):
-    X_index, X_all = [], []
+def compute_XZ(subsumptions):
+    X_index, Z_all = [], []
 
     for hyponym, hypernym in subsumptions:
-        offset        = len(X_all)
-        word_synonyms = [hyponym] + synonyms[hyponym] if add_synonyms else [hyponym]
+        offset        = len(Z_all)
+        word_synonyms = [hyponym] + synonyms[hyponym]
 
         X_index.append([offset, len(word_synonyms)])
 
         for synonym in word_synonyms:
-            X_all.append(w2v[synonym])
+            Z_all.append(w2v[synonym])
 
-    return (np.array(X_index, dtype='int32'), np.array(X_all))
+    return (np.array(X_index, dtype='int32'), np.array(Z_all))
 
-def compute_XYZ(X_index, shuffle=False):
-    XYZ = []
-
-    for i, (offset, length) in enumerate(X_index):
-        for j in range(offset, offset + length):
-            # X = offset, Y = i, Z = j
-            XYZ.append((offset, i, j))
-
-    # only the training data need to be shuffled
-    if shuffle:
-        random.shuffle(XYZ)
-
-    return np.array(XYZ, dtype='int32')
-
-X_index_train,      X_all_train      = compute_X(subsumptions_train, add_synonyms=False)
-X_index_validation, X_all_validation = compute_X(subsumptions_validation, add_synonyms=False)
-X_index_test,       X_all_test       = compute_X(subsumptions_test, add_synonyms=False)
-
-XYZ_train      = compute_XYZ(X_index_train, shuffle=True)
-XYZ_validation = compute_XYZ(X_index_validation)
-XYZ_test       = compute_XYZ(X_index_test)
+X_index_train,      Z_all_train      = compute_XZ(subsumptions_train)
+X_index_validation, Z_all_validation = compute_XZ(subsumptions_validation)
+X_index_test,       Z_all_test       = compute_XZ(subsumptions_test)
 
 Y_all_train      = np.array([w2v[w] for _, w in subsumptions_train])
 Y_all_validation = np.array([w2v[w] for _, w in subsumptions_validation])
 Y_all_test       = np.array([w2v[w] for _, w in subsumptions_test])
 
 np.savez_compressed('train.npz',      X_index=X_index_train,
-                                      X_all=X_all_train,
                                       Y_all=Y_all_train,
-                                      XYZ=XYZ_train)
+                                      Z_all=Z_all_train)
 
 np.savez_compressed('validation.npz', X_index=X_index_validation,
-                                      X_all=X_all_validation,
                                       Y_all=Y_all_validation,
-                                      XYZ=XYZ_validation)
+                                      Z_all=Z_all_validation)
 
 np.savez_compressed('test.npz',       X_index=X_index_test,
-                                      X_all=X_all_test,
                                       Y_all=Y_all_test,
-                                      XYZ=XYZ_test)
+                                      Z_all=Z_all_test)
 
 print('I have %d train, %d validation and %d test examples.' % (
-    XYZ_train.shape[0],
-    XYZ_validation.shape[0],
-    XYZ_test.shape[0])
+    Y_all_train.shape[0],
+    Y_all_validation.shape[0],
+    Y_all_test.shape[0])
 )
