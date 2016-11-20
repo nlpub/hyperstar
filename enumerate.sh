@@ -24,7 +24,6 @@ for k in 1 2 3 4 5 6 7 8; do
     cp kmeans.pickle $CWD/
 
     ./evaluate.py --test=validation.npz --subsumptions=subsumptions-validation.txt $CWD | tee -a $PREFIX-validation.log
-    ./evaluate.py $CWD | tee -a $PREFIX-evaluation.log
   done
 
   for lambda in 0.1 0.2 0.3; do
