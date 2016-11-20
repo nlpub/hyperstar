@@ -76,8 +76,15 @@ for path in args['path']:
     clusters_test  = kmeans.predict(Y_all_test - X_all_test)
 
     for model in MODELS:
-        with np.load('%s.test.npz' % model) as npz:
-            Y_hat_clusters = {int(cluster): npz[cluster] for cluster in npz.files}
+        try:
+            with np.load('%s.test.npz' % model) as npz:
+                Y_hat_clusters = {int(cluster): npz[cluster] for cluster in npz.files}
+        except FileNotFoundError:
+            Y_hat_clusters = {}
+
+        if kmeans.n_clusters != len(Y_hat_clusters):
+            print('Missing the output for the model "%s"!' % model, file=sys.stderr, flush=True)
+            continue
 
         Y_all_hat = extract(clusters_test, Y_hat_clusters)
 

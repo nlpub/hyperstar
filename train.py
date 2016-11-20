@@ -16,6 +16,7 @@ FLAGS = flags.FLAGS
 flags.DEFINE_string( 'model',  'baseline', 'Model name.')
 flags.DEFINE_string( 'train', 'train.npz', 'Training set.')
 flags.DEFINE_string( 'test',   'test.npz', 'Test set.')
+flags.DEFINE_float(  'stddev',        .01, 'Value of stddev for matrix initialization.')
 flags.DEFINE_float(  'lambdac',       .10, 'Value of lambda.')
 flags.DEFINE_integer('seed',          228, 'Random seed.')
 flags.DEFINE_integer('num_epochs',    300, 'Number of training epochs.')
@@ -61,10 +62,10 @@ def train(config, model, data, callback=lambda: None):
             min(FLAGS.batch_size, data.X_train.shape[0])),
         flush=True)
 
-        for epoch in range(0, FLAGS.num_epochs):
+        for epoch in range(FLAGS.num_epochs):
             X, Y, Z = data.train_shuffle()
 
-            for step in range(0, steps):
+            for step in range(steps):
                 head =  step      * FLAGS.batch_size
                 tail = (step + 1) * FLAGS.batch_size
 
@@ -124,12 +125,16 @@ def main(_):
     clusters_train = kmeans.predict(Y_all_train - X_all_train)
     clusters_test  = kmeans.predict(Y_all_test  - X_all_test)
 
-    model = MODELS[FLAGS.model](x_size=Z_all_train.shape[1], y_size=Y_all_train.shape[1], lambda_=FLAGS.lambdac)
+    model = MODELS[FLAGS.model](x_size=Z_all_train.shape[1], y_size=Y_all_train.shape[1], w_stddev=FLAGS.stddev, lambda_=FLAGS.lambdac)
     print(model, flush=True)
 
-    for path in glob.glob('%s.W-*.txt' % (FLAGS.model)):
+    for path in glob.glob('%s.k*.trained*' % FLAGS.model):
         print('Removing a stale file: "%s".' % path, flush=True)
         os.remove(path)
+
+    if os.path.isfile('%s.test.npz' % FLAGS.model):
+        print('Removing a stale file: "%s".' % ('%s.test.npz' % FLAGS.model), flush=True)
+        os.remove('%s.test.npz' % FLAGS.model)
 
     Y_hat_test = {}
 

@@ -93,3 +93,5 @@ ENV/
 *.w2v
 *.npy
 *.npz
+*.trained
+*.trained.meta
