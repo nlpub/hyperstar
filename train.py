@@ -25,10 +25,10 @@ flags.DEFINE_boolean('gpu',          True, 'Try using GPU.')
 
 MODELS = {
     'baseline':              Baseline,
-    'regularized_frobenius': RegularizedFrobenius,
     'regularized_hyponym':   RegularizedHyponym,
     'regularized_synonym':   RegularizedSynonym,
     'regularized_hypernym':  RegularizedHypernym,
+    'frobenius_loss':        FrobeniusLoss,
     'mlp':                   MLP
 }
 
