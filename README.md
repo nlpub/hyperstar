@@ -27,10 +27,10 @@ This implementation is designed for processing the Russian language, but there s
 The original approach learns a matrix such that transforms an input hyponym embedding vector into its hypernym embedding vector. A few variations featuring additive regularization of this approach have also been implemented. The following models are available:
 
 * `baseline`, the original approach,
-* `regularized_frobenius` that penalizes the [Frobenius norm](https://en.wikipedia.org/wiki/Matrix_norm#Frobenius_norm) of the projection matrix,
 * `regularized_hyponym` that penalizes the matrix to projecting the hypernyms back to the hyponyms,
 * `regularized_synonym` that penalizes the matrix to projecting the hypernyms back to the synonyms of the hyponyms,
-* `regularized_hypernym` that promotes the matrix to projecting the hyponym synonyms to the hypernyms.
+* `regularized_hypernym` that promotes the matrix to projecting the hyponym synonyms to the hypernyms,
+* `frobenius_loss` that uses the [Frobenius norm](https://en.wikipedia.org/wiki/Matrix_norm#Frobenius_norm) as the loss function for `baseline`.
 
 ## Training
 
@@ -43,7 +43,9 @@ The training procedure is implemented in the `./train.py` script. It accepts dif
 * `--model=MODEL`, where `MODEL` is the desired model,
 * `--gpu=1` that suggests the program to use a GPU, when possible,
 * `--num_epochs=300` that specifies the number of training epochs,
-* `--batch_size=2048` that specifies the batch size.
+* `--batch_size=2048` that specifies the batch size,
+* `--stddev=0.01` that specifies the standard deviation for initializating the projection matrix,
+* `--lambdac=0.10` that specifies the regularization coefficient.
 
 After the training, the number of `MODEL.k%d.trained` files being generated representing the trained model for each cluster. Also, the data for evaluation are written into the `MODEL.test.npz` file.
 
