@@ -90,8 +90,15 @@ ENV/
 
 # Datasets
 *.txt
+*.tsv
+*.csv
 *.w2v
 *.npy
 *.npz
+*.pickle
 *.trained
 *.trained.meta
+/checkpoint
+
+# IPython
+*.ipynb
