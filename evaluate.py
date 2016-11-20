@@ -77,7 +77,7 @@ for path in args['path']:
 
     for model in MODELS:
         try:
-            with np.load('%s.test.npz' % model) as npz:
+            with np.load(os.path.join(path, '%s.test.npz') % model) as npz:
                 Y_hat_clusters = {int(cluster): npz[cluster] for cluster in npz.files}
         except FileNotFoundError:
             Y_hat_clusters = {}
