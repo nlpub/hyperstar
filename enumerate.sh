@@ -20,7 +20,7 @@ for k in 1 2 3 4 5 6 7 8; do
     mkdir -pv $CWD
 
     ./train.py --nogpu --model=$model --num_epochs=$NUM_EPOCHS --batch_size=$BATCH_SIZE --seed=$SEED --test=validation.npz | tee $model-train.log
-    mv -f *-train.log *.trained* $CWD/
+    mv -f *-train.log *.trained* $model.test.npz $CWD/
     cp kmeans.pickle $CWD/
 
     ./evaluate.py --test=validation.npz --subsumptions=subsumptions-validation.txt $CWD | tee -a $PREFIX-validation.log
@@ -32,7 +32,7 @@ for k in 1 2 3 4 5 6 7 8; do
 
     for model in regularized_hyponym regularized_synonym; do
       ./train.py --nogpu --model=$model --num_epochs=$NUM_EPOCHS --batch_size=$BATCH_SIZE --seed=$SEED --lambdac=$lambda --test=validation.npz | tee $model-train.log
-      mv -f *-train.log *.trained* $CWD/
+      mv -f *-train.log *.trained* $model.test.npz $CWD/
       cp kmeans.pickle $CWD/
     done
 
