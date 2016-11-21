@@ -61,6 +61,8 @@ significance <- function(df, col, alpha=.025) {
 }
 
 visualize <- function(df, y, ylab, palette) {
+  optimum <- which.max(aggregate(as.formula(sprintf('%s ~ cluster', y)), data=sz100.max, FUN=max)[,y])
+
   ggplot(data = sz100.max, aes(
     x = cluster, y = df[,y], linetype = model, colour = model
   )) +
@@ -80,7 +82,7 @@ visualize <- function(df, y, ylab, palette) {
       palette = palette
     ) +
     geom_line() +
-    geom_vline(xintercept = 15, colour='grey', linetype = 'longdash') +
+    geom_vline(xintercept = optimum, colour='grey', linetype = 'longdash') +
     theme(
       legend.position = 'bottom',
       legend.title = element_blank(),
