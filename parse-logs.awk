@@ -13,5 +13,5 @@ match($0, /overall (.+?). AUC/) {
 match($0, /AUC=(.+)\.$/) {
     auc = substr($0, RSTART);
     gsub("(^AUC=|\\.$)", "", auc);
-    print path[1], path[2], hit[1], hit[2], hit[3], hit[4], hit[5], hit[6], hit[7], hit[8], hit[9], hit[10], auc;
+    print path[1], path[2], hit[1], hit[2], hit[3], hit[4], hit[5], hit[6], hit[7], hit[8], hit[9], hit[10], auc | "sort -n -t'\t' -k1V -k2";
 }
