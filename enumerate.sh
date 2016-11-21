@@ -28,7 +28,7 @@ for k in $CLUSTERS; do
     mkdir -pv $CWD
 
     ./train.py --nogpu --model=$model --num_epochs=$NUM_EPOCHS --batch_size=$BATCH_SIZE --seed=$SEED --test=validation.npz | tee $model-train.log
-    mv -f *-train.log *.trained* $model.test.npz $CWD/
+    mv -f $model-train.log $model.*.trained* $model.test.npz $CWD/
     cp kmeans.pickle $CWD/
 
     CWDS="$CWDS $CWD"
@@ -40,7 +40,7 @@ for k in $CLUSTERS; do
 
     for model in regularized_hyponym regularized_synonym; do
       ./train.py --nogpu --model=$model --num_epochs=$NUM_EPOCHS --batch_size=$BATCH_SIZE --seed=$SEED --lambdac=$lambda --test=validation.npz | tee $model-train.log
-      mv -f *-train.log *.trained* $model.test.npz $CWD/
+      mv -f $model-train.log $model.*.trained* $model.test.npz $CWD/
       cp kmeans.pickle $CWD/
     done
 
