@@ -1,7 +1,7 @@
 #!/usr/bin/awk -f
 BEGIN {
     OFS = "\t";
-    print "directory", "model", "A@1", "A@2", "A@3", "A@4", "A@5", "A@6", "A@7", "A@8", "A@9", "A@10", "AUC";
+    print "directory", "model", "hit@1", "hit@2", "hit@3", "hit@4", "hit@5", "hit@6", "hit@7", "hit@8", "hit@9", "hit@10", "AUC";
 }
 /overall/ {
     match($0, /^For "(.+?)": overall (.+?). AUC=([[:digit:]]+\.[[:digit:]]+).$/, matched);

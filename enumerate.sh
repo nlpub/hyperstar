@@ -1,5 +1,7 @@
 #!/bin/bash -ex
 
+export LANG=en_US.utf8
+
 # Just a prefix for the convenience.
 PREFIX=sz100
 
@@ -12,7 +14,13 @@ BATCH_SIZE=1024
 # The random seed.
 SEED=228
 
-for k in 1 2 3 4 5 6 7 8; do
+# The cluster sizes to iterate over.
+CLUSTERS=$(seq 1 8)
+
+# The lambda values to iterate over.
+LAMBDAS=$(seq 0.1 0.1 0.3)
+
+for k in $CLUSTERS; do
   ./cluster.py -k $k
 
   for model in baseline; do
@@ -23,10 +31,10 @@ for k in 1 2 3 4 5 6 7 8; do
     mv -f *-train.log *.trained* $model.test.npz $CWD/
     cp kmeans.pickle $CWD/
 
-    ./evaluate.py --test=validation.npz --subsumptions=subsumptions-validation.txt $CWD | tee -a $PREFIX-validation.log
+    CWDS="$CWDS $CWD"
   done
 
-  for lambda in 0.1 0.2 0.3; do
+  for lambda in $LAMBDAS; do
     CWD=$PREFIX-k$k-l$lambda
     mkdir -pv $CWD
 
