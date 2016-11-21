@@ -21,27 +21,27 @@ significance <- function(df, col, alpha=.025) {
   model1.mean  <- c()
   model2.mean  <- c()
   significance <- c()
-  
+
   for (k in unique(df$cluster)) {
     for (l1 in levels(df$lambda)) {
       for (l2 in levels(df$lambda)) {
         for (m1 in unique(df$model)) {
           for (m2 in unique(df$model)) {
             if (m1 >= m2) next;
-            
+
             subset1 <- df[df$cluster==k & df$lambda==l1 & df$model==m1, col]
             subset2 <- df[df$cluster==k & df$lambda==l2 & df$model==m2, col]
-            
+
             if (length(subset1) == 0 || length(subset2) == 0) next;
-            
+
             model1       <- c(model1, m1)
             model2       <- c(model2, m2)
             ks           <- c(ks,     k)
             ls1          <- c(ls1,    l1)
             ls2          <- c(ls2,    l2)
-            
+
             test <- try(t.test(subset1, subset2, alternative='less'), silent=T)
-            
+
             if (inherits(test, 'try-error')) {
               model1.mean  <- c(model1.mean,  mean(subset1))
               model2.mean  <- c(model2.mean,  mean(subset2))
@@ -56,13 +56,13 @@ significance <- function(df, col, alpha=.025) {
       }
     }
   }
-  
+
   data.frame(model1=model1, model2=model2, k=ks, l1=ls1, l2=ls2, model1.mean=model1.mean, model2.mean=model2.mean, significance=significance)
 }
 
 visualize <- function(df, y, ylab, palette) {
   optimum <- which.max(aggregate(as.formula(sprintf('%s ~ cluster', y)), data=df, FUN=max)[,y])
-  
+
   ggplot(data = df, aes(
     x = cluster, y = df[,y], linetype = model, colour = model
   )) +
