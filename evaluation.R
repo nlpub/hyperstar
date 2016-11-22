@@ -96,8 +96,8 @@ visualize <- function(df, y, ylab, palette) {
     )
 }
 
-sz100.tested.auc    <- significance(sz100, 'AUC')
 sz100.tested.hit.10 <- significance(sz100, 'hit.10')
+sz100.tested.auc    <- significance(sz100, 'AUC')
 
 print(visualize(sz100.max, 'hit.10', 'hit@10', 'Dark2'))
 print(visualize(sz100.max, 'AUC',    'AUC',    'Dark2'))
