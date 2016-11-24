@@ -11,7 +11,7 @@ from gensim.models.word2vec import Word2Vec
 from collections import defaultdict
 import numpy as np
 
-MODELS = ['baseline', 'regularized_frobenius', 'regularized_hyponym', 'regularized_synonym', 'regularized_hypernym', 'mlp']
+MODELS = ['baseline', 'regularized_hyponym', 'regularized_synonym', 'regularized_hypernym', 'frobenius_loss', 'mlp']
 
 parser = argparse.ArgumentParser(description='Evaluation.')
 parser.add_argument('--w2v',          default='all.norm-sz100-w10-cb0-it1-min100.w2v', nargs='?', help='Path to the word2vec model.')
@@ -76,8 +76,15 @@ for path in args['path']:
     clusters_test  = kmeans.predict(Y_all_test - X_all_test)
 
     for model in MODELS:
-        with np.load('%s.test.npz' % model) as npz:
-            Y_hat_clusters = {int(cluster): npz[cluster] for cluster in npz.files}
+        try:
+            with np.load(os.path.join(path, '%s.test.npz') % model) as npz:
+                Y_hat_clusters = {int(cluster): npz[cluster] for cluster in npz.files}
+        except FileNotFoundError:
+            Y_hat_clusters = {}
+
+        if kmeans.n_clusters != len(Y_hat_clusters):
+            print('Missing the output for the model "%s"!' % model, file=sys.stderr, flush=True)
+            continue
 
         Y_all_hat = extract(clusters_test, Y_hat_clusters)
 

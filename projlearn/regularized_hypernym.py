@@ -6,8 +6,8 @@ class RegularizedHypernym(Baseline):
     A regularized loss function that promotes the projection matrix to
     project not just the initial hyponym, but its synonyms as well.
     """
-    def __init__(self, x_size, y_size, **kwargs):
-        super().__init__(x_size, y_size, **kwargs)
+    def __init__(self, x_size, y_size, w_stddev, **kwargs):
+        super().__init__(x_size, y_size, w_stddev, **kwargs)
 
         self.lambda_  = kwargs['lambda_']
 

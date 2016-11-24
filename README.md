@@ -6,10 +6,21 @@ This is the implementation of the projection learning approach for learning word
 
 In case this software, the study or the dataset was useful for you, please cite the following paper.
 
-* Accepted for publication.
+* Ustalov, D., Panchenko, A.: [Learning Word Subsumption Projections for the Russian Language](http://dx.doi.org/10.1051/itmconf/20160801006). ITM Web of Conferences, Vol.&nbsp;8 (2016) P.&nbsp;01006
 
 ```latex
-% Accepted for publication.
+@article{Ustalov:16:projlearn,
+  author    = {Ustalov, D. and Panchenko, A.},
+  title     = {{Learning Word Subsumption Projections for the Russian Language}},
+  journal   = {ITM Web of Conferences},
+  pages     = {01006},
+  volume    = {8},
+  year      = {2016},
+  url       = {http://dx.doi.org/10.1051/itmconf/20160801006},
+  doi       = {10.1051/itmconf/20160801006},
+  publisher = {EDP Sciences},
+  language  = {english},
+}
 ```
 
 ## Prerequisites
@@ -27,10 +38,10 @@ This implementation is designed for processing the Russian language, but there s
 The original approach learns a matrix such that transforms an input hyponym embedding vector into its hypernym embedding vector. A few variations featuring additive regularization of this approach have also been implemented. The following models are available:
 
 * `baseline`, the original approach,
-* `regularized_frobenius` that penalizes the [Frobenius norm](https://en.wikipedia.org/wiki/Matrix_norm#Frobenius_norm) of the projection matrix,
 * `regularized_hyponym` that penalizes the matrix to projecting the hypernyms back to the hyponyms,
 * `regularized_synonym` that penalizes the matrix to projecting the hypernyms back to the synonyms of the hyponyms,
-* `regularized_hypernym` that promotes the matrix to projecting the hyponym synonyms to the hypernyms.
+* `regularized_hypernym` that promotes the matrix to projecting the hyponym synonyms to the hypernyms,
+* `frobenius_loss` that uses the [Frobenius norm](https://en.wikipedia.org/wiki/Matrix_norm#Frobenius_norm) as the loss function for `baseline`.
 
 ## Training
 
@@ -43,31 +54,15 @@ The training procedure is implemented in the `./train.py` script. It accepts dif
 * `--model=MODEL`, where `MODEL` is the desired model,
 * `--gpu=1` that suggests the program to use a GPU, when possible,
 * `--num_epochs=300` that specifies the number of training epochs,
-* `--batch_size=2048` that specifies the batch size.
+* `--batch_size=2048` that specifies the batch size,
+* `--stddev=0.01` that specifies the standard deviation for initializating the projection matrix,
+* `--lambdac=0.10` that specifies the regularization coefficient.
 
 After the training, the number of `MODEL.k%d.trained` files being generated representing the trained model for each cluster. Also, the data for evaluation are written into the `MODEL.test.npz` file.
 
 ## Evaluating
 
 The evaluation script has only one parameter: the previously trained model to evaluate. Example: `./evaluate.py path-with-the-trained-model`. It is also possible to study how good (but usually bad) the original embeddings represent the subsumptions. For that, it is simply enough to run `./identity.py`.
-
-When processing the evaluation logs, it is convenient to use `awk` for obtaining the structured data frames.
-
-```awk
-#!/usr/bin/awk -f
-BEGIN {
-    OFS = "\t";
-    print "directory", "model", "A@1", "A@2", "A@3", "A@4", "A@5", "A@6", "A@7", "A@8", "A@9", "A@10", "AUC";
-}
-/overall/ {
-    match($0, /^For "(.+?)": overall (.+?). AUC=([[:digit:]]+\.[[:digit:]]+).$/, matched);
-    match(matched[1], /^(.+)\/(.+?)$/, path);
-    split(matched[2], ats, ", ");
-    for (i = 1; i <= length(ats); i++) { match(ats[i], /[[:digit:]]+\.[[:digit:]]+$/, value); ats[i] = value[0]; }
-    auc = matched[3];
-    print path[1], path[2], ats[1], ats[2], ats[3], ats[4], ats[5], ats[6], ats[7], ats[8], ats[9], ats[10], auc;
-}
-```
 
 ## Copyright
 
