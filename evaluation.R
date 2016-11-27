@@ -61,7 +61,8 @@ significance <- function(df, col, alpha=.025) {
 }
 
 visualize <- function(df, y, ylab, palette) {
-  optimum <- which.max(aggregate(as.formula(sprintf('%s ~ cluster', y)), data=df, FUN=max)[,y])
+  optimum <- aggregate(as.formula(sprintf('%s ~ cluster', y)), data=df, FUN=max)
+  optimum <- optimum[which.max(optimum[,y]), 'cluster']
 
   ggplot(data = df, aes(
     x = cluster, y = df[,y], linetype = model, colour = model
