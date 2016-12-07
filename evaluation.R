@@ -1,16 +1,16 @@
 library(ggplot2)
 
-sz100 <- read.csv('sz100-validation.tsv', sep='\t')
+results <- read.csv('sz500-validation.tsv', sep='\t')
 
-# directory='sz100-k15-l0.2' → cluster=15, lambda=0.2
-sz100$cluster <- as.integer(apply(sz100, 1, function(row) gsub('.*-k([[:digit:]]+)-.*',              '\\1', row['directory'], fixed=F)))
-sz100$lambda  <- factor(apply(sz100, 1, function(row) gsub('.*-l([[:digit:]]+(|\\.[[:digit:]]+)).*', '\\1', row['directory'], fixed=F)), ordered=T)
+# directory='sz500-k15-l0.2' → cluster=15, lambda=0.2
+results$cluster <- as.integer(apply(results, 1, function(row) gsub('.*-k([[:digit:]]+)-.*',              '\\1', row['directory'], fixed=F)))
+results$lambda  <- factor(apply(results, 1, function(row) gsub('.*-l([[:digit:]]+(|\\.[[:digit:]]+)).*', '\\1', row['directory'], fixed=F)), ordered=T)
 
-sz100.mean     <- aggregate(hit.10 ~ model + cluster + lambda, data=sz100, FUN=mean)
-sz100.mean$AUC <- aggregate(AUC    ~ model + cluster + lambda, data=sz100, FUN=mean)$AUC
+results.mean     <- aggregate(hit.10 ~ model + cluster + lambda, data=results, FUN=mean)
+results.mean$AUC <- aggregate(AUC    ~ model + cluster + lambda, data=results, FUN=mean)$AUC
 
-sz100.max     <- aggregate(hit.10 ~ model + cluster, data=sz100.mean, FUN=max)
-sz100.max$AUC <- aggregate(AUC    ~ model + cluster, data=sz100.mean, FUN=max)$AUC
+results.max     <- aggregate(hit.10 ~ model + cluster, data=results.mean, FUN=max)
+results.max$AUC <- aggregate(AUC    ~ model + cluster, data=results.mean, FUN=max)$AUC
 
 significance <- function(df, col, alpha=.025) {
   model1       <- c()
@@ -97,8 +97,8 @@ visualize <- function(df, y, ylab, palette) {
     )
 }
 
-sz100.tested.hit.10 <- significance(sz100, 'hit.10')
-sz100.tested.auc    <- significance(sz100, 'AUC')
+results.tested.hit.10 <- significance(results, 'hit.10')
+results.tested.auc    <- significance(results, 'AUC')
 
-print(visualize(sz100.max, 'hit.10', 'hit@10', 'Dark2'))
-print(visualize(sz100.max, 'AUC',    'AUC',    'Dark2'))
+print(visualize(results.max, 'hit.10', 'hit@10', 'Dark2'))
+print(visualize(results.max, 'AUC',    'AUC',    'Dark2'))
