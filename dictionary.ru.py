@@ -6,7 +6,10 @@ import random
 from gensim.models.word2vec import Word2Vec
 from collections import defaultdict
 import numpy as np
-from sklearn.cross_validation import train_test_split
+try:
+    from sklearn.model_selection import train_test_split
+except ImportError:
+    from sklearn.cross_validation import train_test_split
 
 parser = argparse.ArgumentParser(description='Russian Dictionary.')
 parser.add_argument('--w2v',  default='all.norm-sz100-w10-cb0-it1-min100.w2v', nargs='?', help='Path to the word2vec model.')
