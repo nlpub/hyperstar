@@ -14,6 +14,9 @@ BATCH_SIZE=1024
 # The random seed.
 SEED=228
 
+# The word2vec model.
+W2V=all.norm-sz100-w10-cb0-it1-min100.w2v
+
 # The cluster sizes to iterate over.
 CLUSTERS=$(seq 1 8)
 
@@ -47,6 +50,6 @@ for k in $CLUSTERS; do
     CWDS="$CWDS $CWD"
   done
 
-  ./evaluate.py --test=validation.npz --subsumptions=subsumptions-validation.txt $CWDS | tee -a $PREFIX-validation.log
+  ./evaluate.py --w2v=$W2V --test=validation.npz --subsumptions=subsumptions-validation.txt $CWDS | tee -a $PREFIX-validation.log
   unset CWDS
 done
