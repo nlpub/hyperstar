@@ -30,7 +30,7 @@ for k in $CLUSTERS; do
     CWD=$PREFIX-k$k-l0.0
     mkdir -pv $CWD
 
-    ./train.py --nogpu --model=$model --num_epochs=$NUM_EPOCHS --batch_size=$BATCH_SIZE --seed=$SEED --test=validation.npz | tee $model-train.log
+    ./train.py --model=$model --num_epochs=$NUM_EPOCHS --batch_size=$BATCH_SIZE --seed=$SEED --test=validation.npz | tee $model-train.log
     mv -f $model-train.log $model.*.trained* $model.test.npz $CWD/
     cp kmeans.pickle $CWD/
 
@@ -42,7 +42,7 @@ for k in $CLUSTERS; do
     mkdir -pv $CWD
 
     for model in regularized_hyponym regularized_synonym; do
-      ./train.py --nogpu --model=$model --num_epochs=$NUM_EPOCHS --batch_size=$BATCH_SIZE --seed=$SEED --lambdac=$lambda --test=validation.npz | tee $model-train.log
+      ./train.py --model=$model --num_epochs=$NUM_EPOCHS --batch_size=$BATCH_SIZE --seed=$SEED --lambdac=$lambda --test=validation.npz | tee $model-train.log
       mv -f $model-train.log $model.*.trained* $model.test.npz $CWD/
       cp kmeans.pickle $CWD/
     done
