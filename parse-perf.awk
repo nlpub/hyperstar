@@ -1,13 +1,17 @@
 #!/usr/bin/awk -f
 BEGIN {
     OFS = "\t";
-    print "clusters", "seconds";
+    print "cluster", "seconds";
 }
-match($0, /done in (.+?)\.$/) {
-    len  = split(substr($0, RSTART + 8, RLENGTH - 9), time, ":");
-    for (i = len; i > 0; i--) seconds += (time[i] + 0.) * 60 ^ (len - i);
-    clusters++;
+match($0, /Cluster ([[:digit:]]+) done in/) {
+    cluster = substr($0, RSTART + 8, RLENGTH - 16);
+    time    = substr($0, RSTART + RLENGTH, length() - RSTART - RLENGTH);
+    len     = split(time, fields, ":");
+    for (i = len; i > 0; i--) seconds[cluster] += (fields[i] + 0.) * 60 ^ (len - i);
+    count[cluster]++;
 }
 END {
-    print clusters, seconds;
+    for (cluster in seconds) {
+        print cluster, seconds[cluster] / count[cluster] | "sort -t'\t' -k1n";
+    }
 }
