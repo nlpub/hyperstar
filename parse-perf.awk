@@ -12,6 +12,10 @@ match($0, /Cluster ([[:digit:]]+) done in/) {
 }
 END {
     for (cluster in seconds) {
-        print cluster, seconds[cluster] / count[cluster] | "sort -t'\t' -k1n";
+        average = seconds[cluster] / count[cluster];
+        print cluster, average | "sort -t'\t' -k1n";
+        total += average;
     }
+    close("sort -t'\t' -k1n");
+    print OFS total;
 }
