@@ -67,7 +67,7 @@ def compute_ats(measures):
     return [sum(measures[j].values()) / len(subsumptions_test) for j in range(len(measures))]
 
 def compute_auc(ats):
-    return sum([ats[j] + ats[j + 1] for j in range(0, len(ats) - 1)]) / 2 / 10
+    return sum([ats[j] + ats[j + 1] for j in range(0, len(ats) - 1)]) / 2
 
 for path in args['path']:
     print('Doing "%s" on "%s" and "%s".' % (path, args['test'], args['subsumptions']), flush=True)
