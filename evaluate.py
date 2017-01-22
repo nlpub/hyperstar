@@ -11,9 +11,6 @@ from gensim.models.word2vec import Word2Vec
 from collections import defaultdict
 import numpy as np
 
-
-MODELS = ['baseline', 'regularized_hyponym', 'regularized_synonym', 'regularized_hypernym', 'frobenius_loss', 'mlp']
-
 parser = argparse.ArgumentParser(description='Evaluation.')
 parser.add_argument('--w2v',          default='all.norm-sz100-w10-cb0-it1-min100.w2v', nargs='?', help='Path to the word2vec model.')
 parser.add_argument('--test',         default='test.npz',              nargs='?', help='Path to the test set.')

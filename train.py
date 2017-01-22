@@ -23,15 +23,6 @@ flags.DEFINE_integer('num_epochs',    300, 'Number of training epochs.')
 flags.DEFINE_integer('batch_size',   2048, 'Batch size.')
 flags.DEFINE_boolean('gpu',          True, 'Try using GPU.')
 
-MODELS = {
-    'baseline':              Baseline,
-    'regularized_hyponym':   RegularizedHyponym,
-    'regularized_synonym':   RegularizedSynonym,
-    'regularized_hypernym':  RegularizedHypernym,
-    'frobenius_loss':        FrobeniusLoss,
-    'mlp':                   MLP
-}
-
 def train(config, model, data, callback=lambda: None):
     train_op = tf.train.AdamOptimizer(epsilon=1.).minimize(model.loss)
 

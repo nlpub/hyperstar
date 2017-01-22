@@ -14,18 +14,9 @@ import numpy as np
 import tensorflow as tf
 from projlearn import *
 
-MODELS = {
-    'baseline':              Baseline,
-    'regularized_hyponym':   RegularizedHyponym,
-    'regularized_synonym':   RegularizedSynonym,
-    'regularized_hypernym':  RegularizedHypernym,
-    'frobenius_loss':        FrobeniusLoss,
-    'mlp':                   MLP
-}
-
 parser = argparse.ArgumentParser(description='Expansion.')
 parser.add_argument('--kmeans',     default='kmeans.pickle', nargs='?', help='Path to k-means.pickle.')
-parser.add_argument('--model',      default='baseline', nargs='?', help='The model.')
+parser.add_argument('--model',      default='baseline', nargs='?', choices=MODELS.keys(), help='The model.')
 parser.add_argument('--path',       default='', nargs='?', help='The path to the model dump.')
 parser.add_argument('--w2v',        default='all.norm-sz100-w10-cb0-it1-min100.w2v', nargs='?', help='Path to the word2vec model.')
 parser.add_argument('--slow',       action='store_true', help='Disable most similar words calculation optimization.')
