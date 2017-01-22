@@ -42,7 +42,7 @@ with open(args['subsumptions']) as f:
         if row[0] in w2v and row[1] in w2v:
             subsumptions.append((row[0], row[1]))
         else:
-            print('Pair (%s, %s) is not present in w2v.' % row, flush=True, file=sys.stderr)
+            print('Pair (%s, %s) is not present in w2v.' % (row[0], row[1]), flush=True, file=sys.stderr)
 
 X_all = np.array([w2v[word] for word, _ in subsumptions])
 Y_all = np.array([w2v[word] for _, word in subsumptions])
