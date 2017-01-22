@@ -11,12 +11,14 @@ from gensim.models.word2vec import Word2Vec
 from collections import defaultdict
 import numpy as np
 from projlearn import MODELS
+from multiprocessing import cpu_count
 
 parser = argparse.ArgumentParser(description='Evaluation.')
 parser.add_argument('--w2v',          default='all.norm-sz100-w10-cb0-it1-min100.w2v', nargs='?', help='Path to the word2vec model.')
 parser.add_argument('--test',         default='test.npz',              nargs='?', help='Path to the test set.')
 parser.add_argument('--subsumptions', default='subsumptions-test.txt', nargs='?', help='Path to the test subsumptions.')
 parser.add_argument('--non_optimized', action='store_true', help='Disable most similar words calculation optimization.')
+parser.add_argument('--threads',       nargs='?', type=int, default=cpu_count(), help='Number of threads.')
 parser.add_argument('path', nargs='*', help='List of the directories with results.')
 args = vars(parser.parse_args())
 
@@ -96,7 +98,7 @@ for path in args['path']:
             # normalize Y_all_hat to make dot product equeal to cosine and monotonically decreasing function of euclidean distance
             Y_all_hat_norm = Y_all_hat / np.linalg.norm(Y_all_hat,axis=1)[:,np.newaxis]
             print('nn_vec...')
-            similar_indices = nn_vec(Y_all_hat_norm, w2v.syn0norm, topn=10, sort=True, return_sims=False, nthreads=8, verbose=False)
+            similar_indices = nn_vec(Y_all_hat_norm, w2v.syn0norm, topn=10, sort=True, return_sims=False, nthreads=args['threads'], verbose=False)
             print('nn_vec results covert...')
             similar_words = [[w2v.index2word[ind] for ind in row] for row in similar_indices]
             print('done')

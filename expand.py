@@ -13,6 +13,7 @@ from collections import defaultdict
 import numpy as np
 import tensorflow as tf
 from projlearn import *
+from multiprocessing import cpu_count
 
 parser = argparse.ArgumentParser(description='Expansion.')
 parser.add_argument('--kmeans',     default='kmeans.pickle', nargs='?', help='Path to k-means.pickle.')
@@ -21,6 +22,7 @@ parser.add_argument('--path',       default='', nargs='?', help='The path to the
 parser.add_argument('--w2v',        default='all.norm-sz100-w10-cb0-it1-min100.w2v', nargs='?', help='Path to the word2vec model.')
 parser.add_argument('--slow',       action='store_true', help='Disable most similar words calculation optimization.')
 parser.add_argument('--neighbours', nargs='?', type=int, default=10)
+parser.add_argument('--threads',    nargs='?', type=int, default=cpu_count(), help='Number of threads.')
 parser.add_argument('subsumptions', help='Subsumption pairs to expand.')
 args = vars(parser.parse_args())
 
@@ -73,7 +75,7 @@ expansions = {}
 
 if not args['slow']:
     Y_hat_all_norm  = Y_hat_all / np.linalg.norm(Y_hat_all, axis=1)[:, np.newaxis]
-    indices, similarities = nn_vec(Y_hat_all_norm, w2v.syn0norm, topn=args['neighbours'], sort=True, return_sims=True, nthreads=8, verbose=False)
+    indices, similarities = nn_vec(Y_hat_all_norm, w2v.syn0norm, topn=args['neighbours'], sort=True, return_sims=True, nthreads=args['threads'], verbose=False)
     similar_words = [[(w2v.index2word[index], similarities[i][j]) for j, index in enumerate(neighbours)] for i, neighbours in enumerate(indices)]
 
 for i, pair in enumerate(subsumptions):
