@@ -71,18 +71,15 @@ for cluster, indices in X_clusters.items():
         for i, j in enumerate(indices):
             Y_hat_all[j] = Y_hat[i]
 
-expansions = {}
-
 if not args['slow']:
     Y_hat_all_norm  = Y_hat_all / np.linalg.norm(Y_hat_all, axis=1)[:, np.newaxis]
     indices, similarities = nn_vec(Y_hat_all_norm, w2v.syn0norm, topn=args['neighbours'], sort=True, return_sims=True, nthreads=args['threads'], verbose=False)
     similar_words = [[(w2v.index2word[index], similarities[i][j]) for j, index in enumerate(neighbours)] for i, neighbours in enumerate(indices)]
 
-for i, pair in enumerate(subsumptions):
+for i, (hyponym, hypernym) in enumerate(subsumptions):
     if not args['slow']:
-        expansions[pair] = similar_words[i]
+        expansions = similar_words[i]
     else:
-        expansions[pair] = w2v.most_similar(positive=[Y_hat_all[i]], topn=args['neighbours'])
+        expansions = w2v.most_similar(positive=[Y_hat_all[i]], topn=args['neighbours'])
 
-for (hyponym, hypernym), expansion in expansions.items():
-    print('\t'.join((hyponym, hypernym, ', '.join(('%s:%f' % entry for entry in expansion)))))
+    print('\t'.join((hyponym, hypernym, ', '.join(('%s:%f' % expansion for expansion in expansions)))))
