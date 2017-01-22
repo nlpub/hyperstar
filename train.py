@@ -30,7 +30,7 @@ def train(config, model, data, callback=lambda: None):
     train_times = []
 
     with tf.Session(config=config) as sess:
-        init_op = tf.initialize_all_variables()
+        init_op = tf.global_variables_initializer()
         sess.run(init_op)
 
         feed_dict_train, feed_dict_test = {
