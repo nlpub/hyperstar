@@ -1,7 +1,7 @@
 import tensorflow as tf
 from .baseline import Baseline
 
-class RegularizedHyponym(Baseline):
+class RegularizedHyponymPhi(Baseline):
     '''
     A regularized loss function that penalizes the symmetry of
     the projection matrix using the initial hyponym.
@@ -11,9 +11,7 @@ class RegularizedHyponym(Baseline):
 
         self.lambda_       = kwargs['lambda_']
 
-        self.YY_hat        = tf.matmul(self.Y_hat, self.W)
-
-        self.YY_similarity = self.dot(self.X, self.YY_hat)
+        self.YY_similarity = self.dot(self.X, self.Y_hat)
         self.YY_loss       = tf.nn.l2_loss(self.YY_similarity)
 
         self.loss          = tf.add(self.Y_loss, self.lambda_ * self.YY_loss)
