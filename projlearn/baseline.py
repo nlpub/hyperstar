@@ -28,7 +28,7 @@ class Baseline:
 
     def l2_norm(self, t, name='l2_norm_op'):
         with tf.name_scope(name) as scope:
-            l2_norm_op = tf.sqrt(tf.reduce_sum(tf.square(t), 1), name=scope)
+            l2_norm_op = tf.sqrt(tf.nn.l2_loss(t) * 2, name=scope)
             return l2_norm_op
 
     def dot(self, X, Y, name='dot_op'):
