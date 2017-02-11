@@ -57,7 +57,6 @@ def argmaxk_rows(arr, k=10, sort=False, impl='opt1', nthreads=8):
     else:
         m = arr.shape[0]
         batchsize = int(ceil(1. * m / nthreads))
-        print ( "%s for %d rows in %d threads, batchsize=%d" % (impl, m, nthreads, batchsize) )
         def ppp(i):
             return fimpl(arr[i:i+batchsize, :], k, sort)
         lres = parallel_map(ppp, range(0,m,batchsize), threads=nthreads)

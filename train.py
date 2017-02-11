@@ -23,15 +23,6 @@ flags.DEFINE_integer('num_epochs',    300, 'Number of training epochs.')
 flags.DEFINE_integer('batch_size',   2048, 'Batch size.')
 flags.DEFINE_boolean('gpu',          True, 'Try using GPU.')
 
-MODELS = {
-    'baseline':              Baseline,
-    'regularized_hyponym':   RegularizedHyponym,
-    'regularized_synonym':   RegularizedSynonym,
-    'regularized_hypernym':  RegularizedHypernym,
-    'frobenius_loss':        FrobeniusLoss,
-    'mlp':                   MLP
-}
-
 def train(config, model, data, callback=lambda: None):
     train_op = tf.train.AdamOptimizer(epsilon=1.).minimize(model.loss)
 
@@ -39,7 +30,7 @@ def train(config, model, data, callback=lambda: None):
     train_times = []
 
     with tf.Session(config=config) as sess:
-        init_op = tf.initialize_all_variables()
+        init_op = tf.global_variables_initializer()
         sess.run(init_op)
 
         feed_dict_train, feed_dict_test = {
