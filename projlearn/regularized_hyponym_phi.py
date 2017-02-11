@@ -11,7 +11,7 @@ class RegularizedHyponymPhi(Baseline):
 
         self.lambda_       = kwargs['lambda_']
 
-        self.YY_similarity = self.dot(self.X, self.Y_hat)
+        self.YY_similarity = self.dot(self.Y_hat, self.X)
         self.YY_loss       = tf.nn.l2_loss(self.YY_similarity)
 
         self.loss          = tf.add(self.Y_loss, self.lambda_ * self.YY_loss)
