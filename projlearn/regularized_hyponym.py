@@ -13,8 +13,8 @@ class RegularizedHyponym(Baseline):
 
         self.YY_hat        = tf.matmul(self.Y_hat, self.W)
 
-        self.YY_similarity = self.dot(self.X, self.YY_hat)
-        self.YY_loss       = tf.nn.l2_loss(self.YY_similarity)
+        self.YY_similarity = self.dot(self.YY_hat, self.X)
+        self.YY_loss       = tf.nn.l2_loss(self.YY_similarity) * 2
 
         self.loss          = tf.add(self.Y_loss, self.lambda_ * self.YY_loss)
 

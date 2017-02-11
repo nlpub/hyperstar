@@ -10,6 +10,6 @@ class RegularizedSynonymPhi(RegularizedHyponymPhi):
         super().__init__(x_size, y_size, w_stddev, **kwargs)
 
         self.YY_similarity = self.dot(self.Y_hat, self.Z)
-        self.YY_loss       = tf.nn.l2_loss(self.YY_similarity)
+        self.YY_loss       = tf.nn.l2_loss(self.YY_similarity) * 2
 
         self.loss          = tf.add(self.Y_loss, self.lambda_ * self.YY_loss)
