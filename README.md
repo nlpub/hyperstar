@@ -6,20 +6,18 @@ This is the implementation of the projection learning approach for learning word
 
 In case this software, the study or the dataset was useful for you, please cite the following paper.
 
-* Ustalov, D., Panchenko, A.: [Learning Word Subsumption Projections for the Russian Language](http://dx.doi.org/10.1051/itmconf/20160801006). ITM Web of Conferences, Vol.&nbsp;8 (2016) P.&nbsp;01006
+* [Ustalov, D.](https://github.com/dustalov), [Arefyev, N.](https://github.com/nvanva), [Biemann, C.](https://www.inf.uni-hamburg.de/en/inst/ab/lt/people/chris-biemann.html), [Panchenko, A.](https://www2.informatik.uni-hamburg.de/fiona/pers.php?lang=en&order=name#panchenko): **Negative Sampling Improves Hypernymy Extraction Based on Projection Learning**. Proceedings of the 15th Conference of the European Chapter of the Association for Computational Linguistics: Short Papers, Valencia, Spain, Association for Computational Linguistics (2017) Accepted for publication.
 
 ```latex
-@article{Ustalov:16:projlearn,
-  author    = {Ustalov, D. and Panchenko, A.},
-  title     = {{Learning Word Subsumption Projections for the Russian Language}},
-  journal   = {ITM Web of Conferences},
-  pages     = {01006},
-  volume    = {8},
-  year      = {2016},
-  url       = {http://dx.doi.org/10.1051/itmconf/20160801006},
-  doi       = {10.1051/itmconf/20160801006},
-  publisher = {EDP Sciences},
+@inproceedings{Ustalov:17:eacl,
+  author    = {Ustalov, Dmitry and Arefyev, Nikolay and Biemann, Chris and Panchenko, Alexander},
+  title     = {{Negative Sampling Improves Hypernymy Extraction Based on Projection Learning}},
+  booktitle = {Proceedings of the 15th Conference of the European Chapter of the Association for Computational Linguistics: Short Papers},
+  year      = {2017},
+  address   = {Valencia, Spain},
+  publisher = {Association for Computational Linguistics},
   language  = {english},
+  note      = {Accepted for publication.},
 }
 ```
 
@@ -66,4 +64,4 @@ The evaluation script has only one parameter: the previously trained model to ev
 
 ## Copyright
 
-Copyright (c) 2016 [Dmitry Ustalov](https://ustalov.name/en/). See LICENSE for details.
+Copyright (c) 2016&ndash;2017 [Dmitry Ustalov](https://ustalov.name/en/) and others. See LICENSE for details.
