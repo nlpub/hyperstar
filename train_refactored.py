@@ -173,6 +173,8 @@ def main(_):
                                     lambda_=FLAGS.lambdac)
         print(model, flush=True)
 
+    model.init_summary()
+
     for path in glob.glob('%s.k*.trained*' % FLAGS.model):
         print('Removing a stale file: "%s".' % path, flush=True)
         os.remove(path)

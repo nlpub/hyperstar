@@ -35,3 +35,10 @@ class Baseline:
         with tf.name_scope(name) as scope:
             dot_op = tf.diag_part(tf.matmul(X, Y, transpose_b=True))
             return dot_op
+
+    def init_summary(self):
+        tf.summary.histogram('W', self.W)
+        tf.summary.scalar('Y_LOSS', self.Y_loss)
+        tf.summary.scalar('LOSS', self.loss)
+        self.summary = tf.summary.merge_all()
+
