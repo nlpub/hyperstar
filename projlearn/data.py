@@ -25,7 +25,7 @@ class Data:
         X = Z_all[X_index[subsumptions, 0]]
         Y = Y_all[subsumptions]
         Z = self.sample_Z(subsumptions, X_index, Z_all)
-        assert X.shape == Y.shape == Z.shape
+        assert X.shape[0] == Y.shape[0] == Z.shape[0]
         return (X, Y, Z)
 
     def sample_Z(self, subsumptions, X_index, Z_all):
