@@ -7,6 +7,7 @@ from .regularized_synonym_phi import RegularizedSynonymPhi
 from .regularized_hypernym    import RegularizedHypernym
 from .frobenius_loss          import FrobeniusLoss
 from .mlp                     import MLP
+from .toyota import Toyota
 
 MODELS = {
     'baseline':                Baseline,
@@ -16,5 +17,6 @@ MODELS = {
     'regularized_synonym_phi': RegularizedSynonymPhi,
     'regularized_hypernym':    RegularizedHypernym,
     'frobenius_loss':          FrobeniusLoss,
-    'mlp':                     MLP
+    'mlp':                     MLP,
+    'toyota': Toyota
 }
