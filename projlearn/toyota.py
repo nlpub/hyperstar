@@ -93,3 +93,7 @@ class Toyota:
 
     def load_w2v(self, embs, sess):
         sess.run(self.embs_assign, feed_dict={self.embs_ph: embs})
+
+
+    def init_summary(self):
+        pass # self.summary assigned in __init__
