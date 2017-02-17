@@ -128,15 +128,20 @@ def main(_):
 
         # Load hypernymy datasets
         dfs = {}
-        for part in ['train', 'validation', 'test']:
+
+        def load_ds(part):
             f = 'subsumptions-%s.txt' % part
-            df = pd.read_csv(f, sep='\t', names=['hypo', 'hyper'])
+            df = pd.read_csv(f, sep='\t', header=False, names=['hypo', 'hyper'])
             # Convert words to indices
             for col in df.columns:
                 df[col + '_ind'] = df[col].apply(lambda x: w2v.vocab[x].index)
 
             print(f, len(df))
-            dfs[part] = df
+
+
+        dfs['train'] = load_ds('train')
+        dfs['test'] = load_ds('validation') if FLAGS.test.endswith('validation.npz') else load_ds('test')
+
 
         # get embeddings for hyponym and hypernym
         Y_ind_train = np.array(dfs['train']['hyper_ind'])[:,np.newaxis]
