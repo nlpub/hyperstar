@@ -137,7 +137,7 @@ def main(_):
                 df[col + '_ind'] = df[col].apply(lambda x: w2v.vocab[x].index)
 
             print(f, len(df))
-
+            return df
 
         dfs['train'] = load_ds('train')
         dfs['test'] = load_ds('validation') if FLAGS.test.endswith('validation.npz') else load_ds('test')
