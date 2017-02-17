@@ -131,7 +131,7 @@ def main(_):
 
         def load_ds(part):
             f = 'subsumptions-%s.txt' % part
-            df = pd.read_csv(f, sep='\t', header=False, names=['hypo', 'hyper'])
+            df = pd.read_csv(f, sep='\t', header=None, names=['hypo', 'hyper'])
             # Convert words to indices
             for col in df.columns:
                 df[col + '_ind'] = df[col].apply(lambda x: w2v.vocab[x].index)
