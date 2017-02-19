@@ -72,7 +72,7 @@ def train(sess, train_op, model, data, callback=lambda: None, train_writer=None,
     for epoch in tqdm(range(FLAGS.num_epochs), unit='epoch'):
         X, Y, Z = data.train_shuffle()
 
-        for step in range(steps):
+        for step in tqdm(range(steps),unit='step'):
             head =  step      * FLAGS.batch_size
             tail = (step + 1) * FLAGS.batch_size
 
