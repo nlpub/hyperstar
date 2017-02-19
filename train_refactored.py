@@ -12,6 +12,7 @@ from projlearn import *
 from projlearn.toyota import Toyota
 import pandas as pd
 import gensim
+from tqdm import tqdm 
 
 flags = tf.app.flags
 FLAGS = flags.FLAGS
@@ -67,7 +68,7 @@ def train(sess, train_op, model, data, callback=lambda: None, train_writer=None,
         min(FLAGS.batch_size, data.X_train.shape[0])),
     flush=True)
 
-    for epoch in range(FLAGS.num_epochs):
+    for epoch in tqdm(range(FLAGS.num_epochs), unit='epoch'):
         X, Y, Z = data.train_shuffle()
 
         for step in range(steps):
