@@ -26,8 +26,9 @@ flags.DEFINE_integer('seed',          228, 'Random seed.')
 flags.DEFINE_integer('num_epochs',    300, 'Number of training epochs.')
 flags.DEFINE_integer('batch_size',   2048, 'Batch size.')
 flags.DEFINE_boolean('gpu',          True, 'Try using GPU.')
+flags.DEFINE_boolean('cpuembs',      False, 'Place embedding matrix and ops with it on CPU (instead of soft placement).')
 flags.DEFINE_string('w2v',          'corpus_en.norm-sz100-w8-cb0-it1-min20.w2v', 'Path to w2v file (for Toyota model).')
-
+flags.DEFINE_integer('eval_limit', None, 'Maximum number of examples from train/evaluation/test set to evaluate train/test loss etc. during training.')
 MODELS = {
     'baseline':              Baseline,
     'regularized_hyponym':   RegularizedHyponym,
@@ -47,15 +48,15 @@ def train(sess, train_op, model, data, callback=lambda: None, train_writer=None,
     if FLAGS.model=='toyota':
         init_vars.remove(model.embs_var)
     sess.run(tf.variables_initializer(init_vars))
-
+    limit = FLAGS.eval_limit
     feed_dict_train, feed_dict_test = {
-        model.X: data.X_train,
-        model.Y: data.Y_train,
-        model.Z: data.Z_train
+        model.X: data.X_train[:limit],
+        model.Y: data.Y_train[:limit],
+        model.Z: data.Z_train[:limit]
     }, {
-        model.X: data.X_test,
-        model.Y: data.Y_test,
-        model.Z: data.Z_test
+        model.X: data.X_test[:limit],
+        model.Y: data.Y_test[:limit],
+        model.Z: data.Z_test[:limit]
     }
 
     steps = max(data.Y_train.shape[0] // FLAGS.batch_size, 1)
@@ -115,7 +116,7 @@ def main(_):
     if not FLAGS.gpu:
         os.environ['CUDA_VISIBLE_DEVICES'] = ''
 
-    config = tf.ConfigProto()
+    config = tf.ConfigProto(log_device_placement = True)
 
     if FLAGS.model == 'toyota':
         # Load w2v
@@ -173,7 +174,7 @@ def main(_):
         dfs['test']['cluster'] = clusters_test
 
     if FLAGS.model == 'toyota':
-        model = Toyota(embs_type, embs.shape,  w_stddev=FLAGS.stddev)
+        model = Toyota(embs_type, embs.shape, cpuembs=FLAGS.cpuembs,  w_stddev=FLAGS.stddev)
     else:
         model = MODELS[FLAGS.model](x_size=Z_all_train.shape[1], y_size=Y_all_train.shape[1], w_stddev=FLAGS.stddev,
                                     lambda_=FLAGS.lambdac)
@@ -205,8 +206,8 @@ def main(_):
             model.load_w2v(embs, sess)
 
         for cluster in range(kmeans.n_clusters):
-            train_writer = tf.summary.FileWriter('./tf_train_logs1/%s-cl%d-train' % (t, cluster), sess.graph)
-            test_writer = tf.summary.FileWriter('./tf_train_logs1/%s-cl%d-test' % (t, cluster), sess.graph)
+            train_writer = tf.summary.FileWriter('./tf_train_logs2/%s-cl%d-train' % (t, cluster), sess.graph)
+            test_writer = tf.summary.FileWriter('./tf_train_logs2/%s-cl%d-test' % (t, cluster), sess.graph)
 
             if FLAGS.model == 'toyota':
                 # data = Data_toyota(cluster, dfs['train'], dfs['test'])
