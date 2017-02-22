@@ -29,6 +29,8 @@ flags.DEFINE_boolean('gpu',          True, 'Try using GPU.')
 flags.DEFINE_boolean('cpuembs',      False, 'Place embedding matrix and ops with it on CPU (instead of soft placement).')
 flags.DEFINE_string('w2v',          'corpus_en.norm-sz100-w8-cb0-it1-min20.w2v', 'Path to w2v file (for Toyota model).')
 flags.DEFINE_integer('eval_limit', None, 'Maximum number of examples from train/evaluation/test set to evaluate train/test loss etc. during training.')
+flags.DEFINE_boolean('log_device_placement',      False, 'Log device placement of nodes in TensorFlow graph.')
+
 MODELS = {
     'baseline':              Baseline,
     'regularized_hyponym':   RegularizedHyponym,
@@ -117,7 +119,7 @@ def main(_):
     if not FLAGS.gpu:
         os.environ['CUDA_VISIBLE_DEVICES'] = ''
 
-    config = tf.ConfigProto(log_device_placement = True)
+    config = tf.ConfigProto(log_device_placement = FLAGS.log_device_placement) 
 
     if FLAGS.model == 'toyota':
         # Load w2v
@@ -166,7 +168,6 @@ def main(_):
     X_all_test  = Z_all_test[X_index_test[:, 0],   :]
 
     kmeans = pickle.load(open('kmeans.pickle', 'rb'))
-
     clusters_train = kmeans.predict(Y_all_train - X_all_train)
     clusters_test  = kmeans.predict(Y_all_test  - X_all_test)
 
@@ -207,8 +208,8 @@ def main(_):
             model.load_w2v(embs, sess)
 
         for cluster in range(kmeans.n_clusters):
-            train_writer = tf.summary.FileWriter('./tf_train_logs2/%s-cl%d-train' % (t, cluster), sess.graph)
-            test_writer = tf.summary.FileWriter('./tf_train_logs2/%s-cl%d-test' % (t, cluster), sess.graph)
+            train_writer = tf.summary.FileWriter('./tf_train_logs5/%s-cl%d-train' % (t, cluster), sess.graph)
+            test_writer = tf.summary.FileWriter('./tf_train_logs5/%s-cl%d-test' % (t, cluster), sess.graph)
 
             if FLAGS.model == 'toyota':
                 # data = Data_toyota(cluster, dfs['train'], dfs['test'])
