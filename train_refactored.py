@@ -72,7 +72,7 @@ def train(sess, train_op, model, data, callback=lambda: None, train_writer=None,
     for epoch in tqdm(range(FLAGS.num_epochs), unit='epoch'):
         X, Y, Z = data.train_shuffle()
 
-        for step in tqdm(range(steps),unit='step'):
+        for step in range(steps):
             head =  step      * FLAGS.batch_size
             tail = (step + 1) * FLAGS.batch_size
 
@@ -89,18 +89,19 @@ def train(sess, train_op, model, data, callback=lambda: None, train_writer=None,
             train_times.append(t_last - t_this)
 
         if (epoch + 1) % 10 == 0 or (epoch == 0):
-            res = sess.run([model.loss, model.summary], feed_dict=feed_dict_train)
+            res = sess.run([model.loss, model.summary, model.acc_2, model.acc_10], feed_dict=feed_dict_train)
             train_losses.append(res[0])
             train_writer.add_summary(res[1], epoch)
-            res = sess.run([model.loss, model.summary], feed_dict=feed_dict_test)
+            res = sess.run([model.loss, model.summary, model.acc_2, model.acc_10], feed_dict=feed_dict_test)
             test_losses.append(res[0])
             test_writer.add_summary(res[1], epoch)
 
-            print('Cluster %d: epoch = %05d, train loss = %f, test loss = %f.' % (
+            print('Cluster %d: epoch = %05d, train loss = %f, test loss = %f, test acc_2 = %f, test acc_10 = %f.' % (
                 data.cluster + 1,
                 epoch + 1,
                 train_losses[-1] / data.X_train.shape[0],
-                test_losses[-1]  / data.X_test.shape[0]),
+                test_losses[-1]  / data.X_test.shape[0],
+                res[2], res[3]), 
             file=sys.stderr, flush=True)
 
     t_delta = sum(train_times, datetime.timedelta())
