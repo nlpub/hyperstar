@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import codecs
 import argparse
 import csv
 import random
@@ -26,7 +26,7 @@ print('Using %d word2vec dimensions from "%s".' % (w2v.layer1_size, args['w2v'])
 def read_subsumptions(filename):
     subsumptions = []
 
-    with open(filename) as f:
+    with codecs.open(filename, encoding='utf-8') as f:
         reader = csv.reader(f, delimiter='\t', quoting=csv.QUOTE_NONE)
 
         for row in reader:
@@ -37,7 +37,7 @@ def read_subsumptions(filename):
 def read_synonyms(filename):
     synonyms = defaultdict(lambda: list())
 
-    with open(filename) as f:
+    with codecs.open(filename,encoding='utf-8') as f:
         reader = csv.reader(f, delimiter='\t', quoting=csv.QUOTE_NONE)
 
         for row in reader:
