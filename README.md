@@ -1,23 +1,24 @@
 # Learning Word Subsumption Projections
 
-This is the implementation of the projection learning approach for learning word subsumptions, i.e., hyponyms and hypernyms, originally proposed by Fu et al. ([2014](http://dx.doi.org/10.3115/v1/P14-1113)). The approach requires pre-trained word embeddings in the word2vec format and the list of subsumption examples to learn the projection matrix. This implementation uses [TensorFlow](https://www.tensorflow.org/).
+This is the implementation of the projection learning approach for learning word subsumptions, i.e., hyponyms and hypernyms, originally proposed by Fu et al. ([2014](http://dx.doi.org/10.3115/v1/P14-1113)). The approach requires pre-trained word embeddings in the [word2vec](https://code.google.com/archive/p/word2vec/) format and the list of subsumption examples to learn the projection matrix. This implementation uses [TensorFlow](https://www.tensorflow.org/).
 
 ## Citation
 
 In case this software, the study or the dataset was useful for you, please cite the following paper.
 
-* [Ustalov, D.](https://github.com/dustalov), [Arefyev, N.](https://github.com/nvanva), [Biemann, C.](https://www.inf.uni-hamburg.de/en/inst/ab/lt/people/chris-biemann.html), [Panchenko, A.](https://www2.informatik.uni-hamburg.de/fiona/pers.php?lang=en&order=name#panchenko): **Negative Sampling Improves Hypernymy Extraction Based on Projection Learning**. Proceedings of the 15th Conference of the European Chapter of the Association for Computational Linguistics: Short Papers, Valencia, Spain, Association for Computational Linguistics (2017) Accepted for publication.
+* [Ustalov, D.](https://github.com/dustalov), [Arefyev, N.](https://github.com/nvanva), [Biemann, C.](https://www.inf.uni-hamburg.de/en/inst/ab/lt/people/chris-biemann.html), [Panchenko, A.](https://www.inf.uni-hamburg.de/en/inst/ab/lt/people/alexander-panchenko.html): **Negative Sampling Improves Hypernymy Extraction Based on Projection Learning**. 15th Conference of the European Chapter of the Association for Computational Linguistics: Proceedings of Conference, Volume 2: Short Papers, Valencia, Spain, Association for Computational Linguistics (2017) 543&ndash;550
 
 ```latex
 @inproceedings{Ustalov:17:eacl,
   author    = {Ustalov, Dmitry and Arefyev, Nikolay and Biemann, Chris and Panchenko, Alexander},
   title     = {{Negative Sampling Improves Hypernymy Extraction Based on Projection Learning}},
-  booktitle = {Proceedings of the 15th Conference of the European Chapter of the Association for Computational Linguistics: Short Papers},
+  booktitle = {15th Conference of the European Chapter of the Association for Computational Linguistics: Proceedings of Conference, Volume 2: Short Papers},
   year      = {2017},
+  pages     = {543--550},
   address   = {Valencia, Spain},
   publisher = {Association for Computational Linguistics},
+  isbn      = {978-1-945626-35-7},
   language  = {english},
-  note      = {Accepted for publication.},
 }
 ```
 
