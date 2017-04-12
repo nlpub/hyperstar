@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
 import argparse
-import csv
-import glob
 import os
 import pickle
 import sys
@@ -11,34 +9,23 @@ import tensorflow as tf
 from projlearn import *
 
 parser = argparse.ArgumentParser(description='Prediction.')
-parser.add_argument('--kmeans',    default='kmeans.pickle', nargs='?', help='Path to k-means.pickle.')
-parser.add_argument('--model',     default='baseline', nargs='?', choices=MODELS.keys(), help='The model.')
-parser.add_argument('--path',      default='', nargs='?', help='The path to the model dump.')
-parser.add_argument('--distances', default=None, nargs='?', type=argparse.FileType('wb'), help='A text file to write the distances.')
-parser.add_argument('vectors',     type=argparse.FileType('r', encoding='UTF-8'), help='A text file with vectors.')
+parser.add_argument('--kmeans', default='kmeans.pickle', nargs='?', help='Path to k-means.pickle.')
+parser.add_argument('--model',  default='baseline', nargs='?', choices=MODELS.keys(), help='The model.')
+parser.add_argument('--path',   default='', nargs='?', help='The path to the model dump.')
 args = parser.parse_args()
 
 kmeans = pickle.load(open(args.kmeans, 'rb'))
 print('The number of clusters is %d.' % kmeans.n_clusters, flush=True, file=sys.stderr)
 
-X_all, Y_all = [], []
+vectors = np.loadtxt(sys.stdin)
 
-size = None
+X_all, Y_all = vectors[:, :vectors.shape[1]//2], vectors[:, vectors.shape[1]//2:]
 
-for row in np.loadtxt(args.vectors):
-    assert len(row) % 2 == 0
+assert X_all.shape == Y_all.shape
 
-    if size is None:
-        size = len(row)//2
-    else:
-        assert size == len(row)//2
-
-    X_all.append(row[:size])
-    Y_all.append(row[size:])
+size = X_all.shape[1]
 
 print('The vector size is %d.' % size, flush=True, file=sys.stderr)
-
-X_all, Y_all = np.array(X_all), np.array(Y_all)
 
 offsets = Y_all - X_all
 
@@ -63,9 +50,5 @@ for cluster, indices in X_clusters.items():
 
         for i, j in enumerate(indices):
             Y_hat_all[j] = Y_hat[i]
-
-if args.distances is not None:
-    distances = np.apply_along_axis(np.linalg.norm, 1, Y_all - Y_hat_all)
-    np.savetxt(args.distances, distances)
 
 np.savetxt(sys.stdout.buffer, Y_hat_all)
