@@ -19,7 +19,7 @@ parser.add_argument('vectors',     type=argparse.FileType('r', encoding='UTF-8')
 args = parser.parse_args()
 
 kmeans = pickle.load(open(args.kmeans, 'rb'))
-print('The number of clusters is %d.' % (kmeans.n_clusters), flush=True, file=sys.stderr)
+print('The number of clusters is %d.' % kmeans.n_clusters, flush=True, file=sys.stderr)
 
 X_all, Y_all = [], []
 
@@ -35,6 +35,8 @@ for row in np.loadtxt(args.vectors):
 
     X_all.append(row[:size])
     Y_all.append(row[size:])
+
+print('The vector size is %d.' % size, flush=True, file=sys.stderr)
 
 X_all, Y_all = np.array(X_all), np.array(Y_all)
 
