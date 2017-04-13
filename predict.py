@@ -73,9 +73,6 @@ for s, rows in enumerate(grouper(args.slices, reader)):
             for i, j in enumerate(indices):
                 Y_hat_all[j] = Y_hat[i]
 
-    for Y_hat in Y_hat_all:
-        np.save(args.output, Y_hat, allow_pickle=False)
-
-    args.output.flush()
+    np.save(args.output, Y_hat_all, allow_pickle=False)
 
     print('%d slices done.' % (s + 1), flush=True, file=sys.stderr)
