@@ -10,6 +10,7 @@ from itertools import zip_longest
 import numpy as np
 import tensorflow as tf
 from projlearn import *
+from gzip import GzipFile
 
 os.environ['CUDA_VISIBLE_DEVICES'] = ''
 
@@ -23,6 +24,7 @@ parser.add_argument('--kmeans', default='kmeans.pickle', nargs='?', help='Path t
 parser.add_argument('--model',  default='baseline', nargs='?', choices=MODELS.keys(), help='The model.')
 parser.add_argument('--path',   default='', nargs='?', help='The path to the model dump.')
 parser.add_argument('--slices', default=100000, type=int, help='The slice size.')
+parser.add_argument('--gzip', default=False, action='store_true')
 parser.add_argument('output',   type=argparse.FileType('wb'), help='Output file.')
 args = parser.parse_args()
 
@@ -39,40 +41,41 @@ model = MODELS[args.model](x_size=w2v.layer1_size, y_size=w2v.layer1_size, w_std
 
 reader = csv.reader(sys.stdin, delimiter='\t', quoting=csv.QUOTE_NONE)
 
-for s, rows in enumerate(grouper(args.slices, reader)):
-    X_all, Y_all = [], []
+with args.output if not args.gzip else GzipFile(fileobj=args.output, mode='wb') as f:
+    for s, rows in enumerate(grouper(args.slices, reader)):
+        X_all, Y_all = [], []
 
-    for row in rows:
-        if row is None:
-            continue
+        for row in rows:
+            if row is None:
+                continue
 
-        X_all.append(w2v.wv.vocab[row[0]].index)
-        Y_all.append(w2v.wv.vocab[row[1]].index)
+            X_all.append(w2v.wv.vocab[row[0]].index)
+            Y_all.append(w2v.wv.vocab[row[1]].index)
 
-    X_all, Y_all = w2v.wv.syn0[X_all], w2v.wv.syn0[Y_all]
+        X_all, Y_all = w2v.wv.syn0[X_all], w2v.wv.syn0[Y_all]
 
-    offsets = Y_all - X_all
+        offsets = Y_all - X_all
 
-    X_clusters_list = list(enumerate(kmeans.predict(offsets)))
+        X_clusters_list = list(enumerate(kmeans.predict(offsets)))
 
-    X_clusters = {}
+        X_clusters = {}
 
-    for cluster in range(kmeans.n_clusters):
-        X_clusters[cluster] = [i for i, c in X_clusters_list if c == cluster]
+        for cluster in range(kmeans.n_clusters):
+            X_clusters[cluster] = [i for i, c in X_clusters_list if c == cluster]
 
-    Y_hat_all = np.empty(X_all.shape)
+        Y_hat_all = np.empty(X_all.shape)
 
-    for cluster, indices in X_clusters.items():
-        with tf.Session() as sess:
-            saver = tf.train.Saver()
+        for cluster, indices in X_clusters.items():
+            with tf.Session() as sess:
+                saver = tf.train.Saver()
 
-            saver.restore(sess, os.path.join(args.path, '%s.k%d.trained') % (args.model, cluster + 1))
+                saver.restore(sess, os.path.join(args.path, '%s.k%d.trained') % (args.model, cluster + 1))
 
-            Y_hat = sess.run(model.Y_hat, feed_dict={model.X: X_all[indices]})
+                Y_hat = sess.run(model.Y_hat, feed_dict={model.X: X_all[indices]})
 
-            for i, j in enumerate(indices):
-                Y_hat_all[j] = Y_hat[i]
+                for i, j in enumerate(indices):
+                    Y_hat_all[j] = Y_hat[i]
 
-    np.save(args.output, Y_hat_all, allow_pickle=False)
+        np.save(f, Y_hat_all, allow_pickle=False)
 
-    print('%d slices done.' % (s + 1), flush=True, file=sys.stderr)
+        print('%d slices done.' % (s + 1), flush=True, file=sys.stderr)
