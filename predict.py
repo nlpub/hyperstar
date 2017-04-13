@@ -3,29 +3,39 @@
 import argparse
 import os
 import pickle
+from gensim.models.word2vec import Word2Vec
+import csv
 import sys
 import numpy as np
 import tensorflow as tf
 from projlearn import *
 
 parser = argparse.ArgumentParser(description='Prediction.')
+parser.add_argument('--w2v',    required=True, type=argparse.FileType('rb'))
 parser.add_argument('--kmeans', default='kmeans.pickle', nargs='?', help='Path to k-means.pickle.')
 parser.add_argument('--model',  default='baseline', nargs='?', choices=MODELS.keys(), help='The model.')
 parser.add_argument('--path',   default='', nargs='?', help='The path to the model dump.')
+parser.add_argument('output',   type=argparse.FileType('wb'), help='The output npz file.')
 args = parser.parse_args()
 
+w2v = Word2Vec.load_word2vec_format(args.w2v, binary=True, unicode_errors='ignore')
+w2v.init_sims(replace=True)
+
+print('Using %d word2vec dimensions from "%s".' % (w2v.layer1_size, args.w2v.name), flush=True, file=sys.stderr)
+
 kmeans = pickle.load(open(args.kmeans, 'rb'))
+
 print('The number of clusters is %d.' % kmeans.n_clusters, flush=True, file=sys.stderr)
 
-vectors = np.loadtxt(sys.stdin)
+reader = csv.reader(sys.stdin, delimiter='\t', quoting=csv.QUOTE_NONE)
 
-X_all, Y_all = vectors[:, :vectors.shape[1]//2], vectors[:, vectors.shape[1]//2:]
+X_all, Y_all = [], []
 
-assert X_all.shape == Y_all.shape
+for row in reader:
+    X_all.append(w2v[row[0]])
+    Y_all.append(w2v[row[1]])
 
-size = X_all.shape[1]
-
-print('The vector size is %d.' % size, flush=True, file=sys.stderr)
+X_all, Y_all = np.array(X_all), np.array(Y_all)
 
 offsets = Y_all - X_all
 
@@ -36,7 +46,7 @@ X_clusters = {}
 for cluster in range(kmeans.n_clusters):
     X_clusters[cluster] = [i for i, c in X_clusters_list if c == cluster]
 
-model = MODELS[args.model](x_size=size, y_size=size, w_stddev=0, lambda_=0)
+model = MODELS[args.model](x_size=w2v.layer1_size, y_size=w2v.layer1_size, w_stddev=0, lambda_=0)
 
 Y_hat_all = np.empty(X_all.shape)
 
@@ -51,4 +61,4 @@ for cluster, indices in X_clusters.items():
         for i, j in enumerate(indices):
             Y_hat_all[j] = Y_hat[i]
 
-np.savetxt(sys.stdout.buffer, Y_hat_all)
+np.savez_compressed(args.output, Y_hat_all=Y_hat_all)
