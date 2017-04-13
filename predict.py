@@ -10,7 +10,6 @@ from itertools import zip_longest
 import numpy as np
 import tensorflow as tf
 from projlearn import *
-import h5py
 
 os.environ['CUDA_VISIBLE_DEVICES'] = ''
 
@@ -24,7 +23,7 @@ parser.add_argument('--kmeans', default='kmeans.pickle', nargs='?', help='Path t
 parser.add_argument('--model',  default='baseline', nargs='?', choices=MODELS.keys(), help='The model.')
 parser.add_argument('--path',   default='', nargs='?', help='The path to the model dump.')
 parser.add_argument('--slices', default=100000, type=int, help='The slice size.')
-parser.add_argument('hdf5')
+parser.add_argument('output',   type=argparse.FileType('wb'), help='Output file.')
 args = parser.parse_args()
 
 w2v = Word2Vec.load_word2vec_format(args.w2v, binary=True, unicode_errors='ignore')
@@ -40,50 +39,43 @@ model = MODELS[args.model](x_size=w2v.layer1_size, y_size=w2v.layer1_size, w_std
 
 reader = csv.reader(sys.stdin, delimiter='\t', quoting=csv.QUOTE_NONE)
 
-try:
-    os.remove(args.hdf5)
-except OSError:
-    pass
+for s, rows in enumerate(grouper(args.slices, reader)):
+    X_all, Y_all = [], []
 
-with h5py.File(args.hdf5, 'w') as f:
-    dset = f.create_dataset('hyperstar', (0, w2v.layer1_size), maxshape=(None, w2v.layer1_size), chunks=True)
+    for row in rows:
+        if row is None:
+            continue
 
-    for rows in grouper(args.slices, reader):
-        X_all, Y_all = [], []
+        X_all.append(w2v.wv.vocab[row[0]].index)
+        Y_all.append(w2v.wv.vocab[row[1]].index)
 
-        for row in rows:
-            if row is None:
-                continue
+    X_all, Y_all = w2v.wv.syn0[X_all], w2v.wv.syn0[Y_all]
 
-            X_all.append(w2v.wv.vocab[row[0]].index)
-            Y_all.append(w2v.wv.vocab[row[1]].index)
+    offsets = Y_all - X_all
 
-        X_all, Y_all = w2v.wv.syn0[X_all], w2v.wv.syn0[Y_all]
+    X_clusters_list = list(enumerate(kmeans.predict(offsets)))
 
-        offsets = Y_all - X_all
+    X_clusters = {}
 
-        X_clusters_list = list(enumerate(kmeans.predict(offsets)))
+    for cluster in range(kmeans.n_clusters):
+        X_clusters[cluster] = [i for i, c in X_clusters_list if c == cluster]
 
-        X_clusters = {}
+    Y_hat_all = np.empty(X_all.shape)
 
-        for cluster in range(kmeans.n_clusters):
-            X_clusters[cluster] = [i for i, c in X_clusters_list if c == cluster]
+    for cluster, indices in X_clusters.items():
+        with tf.Session() as sess:
+            saver = tf.train.Saver()
 
-        Y_hat_all = np.empty(X_all.shape)
+            saver.restore(sess, os.path.join(args.path, '%s.k%d.trained') % (args.model, cluster + 1))
 
-        for cluster, indices in X_clusters.items():
-            with tf.Session() as sess:
-                saver = tf.train.Saver()
+            Y_hat = sess.run(model.Y_hat, feed_dict={model.X: X_all[indices]})
 
-                saver.restore(sess, os.path.join(args.path, '%s.k%d.trained') % (args.model, cluster + 1))
+            for i, j in enumerate(indices):
+                Y_hat_all[j] = Y_hat[i]
 
-                Y_hat = sess.run(model.Y_hat, feed_dict={model.X: X_all[indices]})
+    for Y_hat in Y_hat_all:
+        np.save(args.output, Y_hat, allow_pickle=False)
 
-                for i, j in enumerate(indices):
-                    Y_hat_all[j] = Y_hat[i]
+    args.output.flush()
 
-        dset.resize(dset.shape[0] + Y_hat_all.shape[0], axis=0)
-
-        dset[-Y_hat_all.shape[0]:] = Y_hat_all
-
-        print('The number of rows is %d.' % dset.shape[0], flush=True, file=sys.stderr)
+    print('%d slices done.' % (s + 1), flush=True, file=sys.stderr)
