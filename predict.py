@@ -32,10 +32,10 @@ reader = csv.reader(sys.stdin, delimiter='\t', quoting=csv.QUOTE_NONE)
 X_all, Y_all = [], []
 
 for row in reader:
-    X_all.append(w2v[row[0]])
-    Y_all.append(w2v[row[1]])
+    X_all.append(w2v.wv.vocab[row[0]].index)
+    Y_all.append(w2v.wv.vocab[row[1]].index)
 
-X_all, Y_all = np.array(X_all), np.array(Y_all)
+X_all, Y_all = w2v.wv.syn0[X_all], w2v.wv.syn0[Y_all]
 
 offsets = Y_all - X_all
 
