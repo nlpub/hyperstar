@@ -32,7 +32,7 @@ This implementation is designed for processing the Russian language, but there s
 * the set of semantic relations: [projlearn-ruwikt.tar.gz].
 
 [projlearn-ruwikt.tar.gz]: http://ustalov.imm.uran.ru/pub/projlearn-ruwikt.tar.gz
-[all.norm-sz100-w10-cb0-it1-min100.w2v]: https://s3-eu-west-1.amazonaws.com/dsl-research/wiki/w2v_export/all.norm-sz100-w10-cb0-it1-min100.w2v
+[all.norm-sz100-w10-cb0-it1-min100.w2v]: http://panchenko.me/data/dsl-backup/w2v-ru/all.norm-sz100-w10-cb0-it1-min100.w2v
 
 ## Models
 
