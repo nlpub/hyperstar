@@ -24,6 +24,17 @@ In case this software, the study or the dataset was useful for you, please cite 
 }
 ```
 
+## Reproducibility
+
+We prepared the Docker image [nlpub/hyperstar](https://hub.docker.com/r/nlpub/hyperstar/) that contains the necessary dependencies for running our software. Also, we published the datasets produced in the research paper mentioned above.
+
+[![ZENODO][zenodo_badge]][zenodo_link] [![Docker Hub][docker_badge]][docker_link]
+
+[zenodo_badge]: https://zenodo.org/badge/DOI/10.5281/zenodo.290524.svg
+[zenodo_link]: https://doi.org/10.5281/zenodo.290524
+[docker_badge]: https://img.shields.io/docker/pulls/nlpub/hyperstar.svg
+[docker_link]: https://hub.docker.com/r/nlpub/hyperstar/
+
 ## Prerequisites
 
 This implementation is designed for processing the Russian language, but there should be no problem in running it on any other language provided with the relevant datasets. However, for processing the Russian language, the following datasets are required:
