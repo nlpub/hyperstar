@@ -28,12 +28,12 @@ In case this software, the study or the dataset was useful for you, please cite 
 
 We prepared the Docker image [nlpub/hyperstar](https://hub.docker.com/r/nlpub/hyperstar/) that contains the necessary dependencies for running our software. Also, the datasets produced in the research paper mentioned above are published on ZENODO: <https://doi.org/10.5281/zenodo.290524>.
 
-[![ZENODO][zenodo_badge]][zenodo_link] [![Docker Hub][docker_badge]][docker_link]
+[![Docker Hub][docker_badge]][docker_link] [![ZENODO][zenodo_badge]][zenodo_link]
 
-[zenodo_badge]: https://zenodo.org/badge/DOI/10.5281/zenodo.290524.svg
-[zenodo_link]: https://doi.org/10.5281/zenodo.290524
 [docker_badge]: https://img.shields.io/docker/pulls/nlpub/hyperstar.svg
 [docker_link]: https://hub.docker.com/r/nlpub/hyperstar/
+[zenodo_badge]: https://zenodo.org/badge/DOI/10.5281/zenodo.290524.svg
+[zenodo_link]: https://doi.org/10.5281/zenodo.290524
 
 ## Prerequisites
 
