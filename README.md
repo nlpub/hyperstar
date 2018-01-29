@@ -26,7 +26,7 @@ In case this software, the study or the dataset was useful for you, please cite 
 
 ## Reproducibility
 
-We prepared the Docker image [nlpub/hyperstar](https://hub.docker.com/r/nlpub/hyperstar/) that contains the necessary dependencies for running our software. Also, we published the datasets produced in the research paper mentioned above.
+We prepared the Docker image [nlpub/hyperstar](https://hub.docker.com/r/nlpub/hyperstar/) that contains the necessary dependencies for running our software. Also, the datasets produced in the research paper mentioned above are published on ZENODO: <https://doi.org/10.5281/zenodo.290524>.
 
 [![ZENODO][zenodo_badge]][zenodo_link] [![Docker Hub][docker_badge]][docker_link]
 
