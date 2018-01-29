@@ -1,0 +1,14 @@
+!requirements.txt
+Dockerfile
+*.yml
+*.bin
+*.txt
+*.tsv
+*.csv
+*.w2v
+*.npy
+*.npz
+*.pickle
+*.trained
+*.trained.meta
+/checkpoint
