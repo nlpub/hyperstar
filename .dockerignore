@@ -2,8 +2,11 @@
 Dockerfile
 *.yml
 *.bin
-*.txt
+*-train.*
+*-validate.*
+*-test.*
 *.tsv
+*.log
 *.csv
 *.w2v
 *.npy
