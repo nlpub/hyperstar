@@ -6,7 +6,7 @@ This is the implementation of the projection learning approach for learning word
 
 In case this software, the study or the dataset was useful for you, please cite the following paper.
 
-* [Ustalov, D.](https://github.com/dustalov), [Arefyev, N.](https://github.com/nvanva), [Biemann, C.](https://www.inf.uni-hamburg.de/en/inst/ab/lt/people/chris-biemann.html), [Panchenko, A.](https://www.inf.uni-hamburg.de/en/inst/ab/lt/people/alexander-panchenko.html): [Negative Sampling Improves Hypernymy Extraction Based on Projection Learning](http://www.aclweb.org/anthology/E17-2087). In: Proceedings of the 15th Conference of the European Chapter of the Association for Computational Linguistics: Volume 2, Short Papers, Valencia, Spain, Association for Computational Linguistics (April 2017) 543–550
+* [Ustalov, D.](https://github.com/dustalov), [Arefyev, N.](https://github.com/nvanva), [Biemann, C.](https://www.inf.uni-hamburg.de/en/inst/ab/lt/people/chris-biemann.html), [Panchenko, A.](https://www.inf.uni-hamburg.de/en/inst/ab/lt/people/alexander-panchenko.html): [Negative Sampling Improves Hypernymy Extraction Based on Projection Learning](https://doi.org/10.18653/v1/E17-2087). In: Proceedings of the 15th Conference of the European Chapter of the Association for Computational Linguistics: Volume 2, Short Papers, Valencia, Spain, Association for Computational Linguistics (April 2017) 543–550
 
 ```latex
 @inproceedings{Ustalov:17:eacl,
@@ -19,6 +19,7 @@ In case this software, the study or the dataset was useful for you, please cite 
   publisher = {Association for Computational Linguistics},
   pages     = {543--550},
   isbn      = {978-1-945626-35-7},
+  doi       = {10.18653/v1/E17-2087},
   url       = {http://www.aclweb.org/anthology/E17-2087},
   language  = {english},
 }
