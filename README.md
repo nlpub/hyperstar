@@ -36,6 +36,10 @@ We prepared the Docker image [nlpub/hyperstar](https://hub.docker.com/r/nlpub/hy
 [zenodo_badge]: https://zenodo.org/badge/DOI/10.5281/zenodo.290524.svg
 [zenodo_link]: https://doi.org/10.5281/zenodo.290524
 
+1. `./enumerate.sh`
+2. `./parse-logs.awk sz100-validation.log >sz100-validation.tsv`
+3. `R --no-save <evaluate.R` (but usually I use [RStudio](https://www.rstudio.com/))
+
 ## Prerequisites
 
 This implementation is designed for processing the Russian language, but there should be no problem in running it on any other language provided with the relevant datasets. However, for processing the Russian language, the following datasets are required:
