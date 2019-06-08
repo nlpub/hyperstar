@@ -99,6 +99,8 @@ ENV/
 *.pickle
 *.trained
 *.trained.meta
+*.tar
+*.tar.*
 /checkpoint
 
 # IPython
