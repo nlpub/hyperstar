@@ -1,13 +1,15 @@
+__author__ = 'Dmitry Ustalov'
+
 import tensorflow as tf
 
 from .baseline import Baseline
 
 
 class RegularizedHyponymPhi(Baseline):
-    '''
+    """
     A regularized loss function that penalizes the symmetry of
     the projection matrix using the initial hyponym.
-    '''
+    """
 
     def __init__(self, x_size, y_size, w_stddev, **kwargs):
         super().__init__(x_size, y_size, w_stddev, **kwargs)

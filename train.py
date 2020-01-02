@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+__author__ = 'Dmitry Ustalov'
+
 import datetime
 import glob
 import os

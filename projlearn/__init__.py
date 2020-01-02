@@ -1,3 +1,5 @@
+__author__ = 'Dmitry Ustalov'
+
 from .baseline import Baseline
 from .data import Data
 from .frobenius_loss import FrobeniusLoss

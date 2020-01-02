@@ -1,7 +1,13 @@
+__author__ = 'Dmitry Ustalov'
+
 import tensorflow as tf
 
 
 class MLP:
+    """
+    A fully connected neural network-based approach.
+    """
+
     def __init__(self, x_size, y_size, lambda_, **kwargs):
         self.x_size = x_size
         self.y_size = y_size

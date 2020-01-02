@@ -1,3 +1,5 @@
+__author__ = 'Dmitry Ustalov'
+
 import random
 
 

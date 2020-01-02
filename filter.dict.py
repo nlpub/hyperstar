@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+__author__ = 'Nikolay Arefyev'
+
 import argparse
 
 import pandas as pd
