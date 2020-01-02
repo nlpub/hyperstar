@@ -1,4 +1,4 @@
-__author__ = 'test'
+__author__ = 'Nikolay Arefyev'
 
 import sys
 import threading

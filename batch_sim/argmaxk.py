@@ -1,10 +1,10 @@
+__author__ = 'Nikolay Arefyev'
+
 from math import ceil
 
 import numpy as np
 
 from .parallel import parallel_map
-
-__author__ = 'test'
 
 
 def argmaxk_rows_basic(arr, k=10, sort=False):

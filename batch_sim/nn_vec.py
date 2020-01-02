@@ -1,9 +1,9 @@
+__author__ = 'Nikolay Arefyev'
+
 import numpy as np
 import psutil
 
 from .argmaxk import argmaxk_rows
-
-__author__ = 'test'
 
 
 def nn_vec_basic(arr1, arr2, topn, sort=True, return_sims=False, nthreads=8):
