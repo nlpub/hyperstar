@@ -1,24 +1,25 @@
-#!/usr/bin/env python
-from batch_sim.nn_vec import nn_vec
+#!/usr/bin/env python3
+
 import argparse
 import csv
-import glob
 import os
 import pickle
-import re
 import sys
-from gensim.models.word2vec import Word2Vec
-from collections import defaultdict
-import numpy as np
-from projlearn import MODELS
 from multiprocessing import cpu_count
 
+import numpy as np
+from gensim.models.word2vec import Word2Vec
+
+from batch_sim.nn_vec import nn_vec
+from projlearn import MODELS
+
 parser = argparse.ArgumentParser(description='Evaluation.')
-parser.add_argument('--w2v',          default='all.norm-sz100-w10-cb0-it1-min100.w2v', nargs='?', help='Path to the word2vec model.')
-parser.add_argument('--test',         default='test.npz',              nargs='?', help='Path to the test set.')
+parser.add_argument('--w2v', default='all.norm-sz100-w10-cb0-it1-min100.w2v', nargs='?',
+                    help='Path to the word2vec model.')
+parser.add_argument('--test', default='test.npz', nargs='?', help='Path to the test set.')
 parser.add_argument('--subsumptions', default='subsumptions-test.txt', nargs='?', help='Path to the test subsumptions.')
 parser.add_argument('--non_optimized', action='store_true', help='Disable most similar words calculation optimization.')
-parser.add_argument('--threads',       nargs='?', type=int, default=cpu_count(), help='Number of threads.')
+parser.add_argument('--threads', nargs='?', type=int, default=cpu_count(), help='Number of threads.')
 parser.add_argument('path', nargs='*', help='List of the directories with results.')
 args = vars(parser.parse_args())
 
@@ -32,11 +33,11 @@ w2v = Word2Vec.load_word2vec_format(os.path.join(WD, args['w2v']), binary=True, 
 w2v.init_sims(replace=True)
 
 with np.load(args['test']) as npz:
-    X_index_test  = npz['X_index']
-    Y_all_test    = npz['Y_all']
-    Z_all_test    = npz['Z_all']
+    X_index_test = npz['X_index']
+    Y_all_test = npz['Y_all']
+    Z_all_test = npz['Z_all']
 
-X_all_test  = Z_all_test[X_index_test[:, 0],   :]
+X_all_test = Z_all_test[X_index_test[:, 0], :]
 
 subsumptions_test = []
 
@@ -47,6 +48,7 @@ with open(args['subsumptions']) as f:
         subsumptions_test.append((row[0], row[1]))
 
 assert len(subsumptions_test) == X_all_test.shape[0]
+
 
 def extract(clusters, Y_hat_clusters):
     cluster_indices = {cluster: 0 for cluster in Y_hat_clusters}
@@ -63,11 +65,14 @@ def extract(clusters, Y_hat_clusters):
 
     return np.array(Y_all_hat)
 
+
 def compute_ats(measures):
     return [sum(measures[j].values()) / len(subsumptions_test) for j in range(len(measures))]
 
+
 def compute_auc(ats):
     return sum([ats[j] + ats[j + 1] for j in range(0, len(ats) - 1)]) / 2
+
 
 for path in args['path']:
     print('Doing "%s" on "%s" and "%s".' % (path, args['test'], args['subsumptions']), flush=True)
@@ -75,7 +80,7 @@ for path in args['path']:
     kmeans = pickle.load(open(os.path.join(path, 'kmeans.pickle'), 'rb'))
     print('The number of clusters is %d.' % (kmeans.n_clusters), flush=True)
 
-    clusters_test  = kmeans.predict(Y_all_test - X_all_test)
+    clusters_test = kmeans.predict(Y_all_test - X_all_test)
 
     for model in MODELS:
         try:
@@ -96,16 +101,17 @@ for path in args['path']:
 
         if not args['non_optimized']:
             # normalize Y_all_hat to make dot product equeal to cosine and monotonically decreasing function of euclidean distance
-            Y_all_hat_norm = Y_all_hat / np.linalg.norm(Y_all_hat,axis=1)[:,np.newaxis]
+            Y_all_hat_norm = Y_all_hat / np.linalg.norm(Y_all_hat, axis=1)[:, np.newaxis]
             print('nn_vec...')
-            similar_indices = nn_vec(Y_all_hat_norm, w2v.syn0norm, topn=10, sort=True, return_sims=False, nthreads=args['threads'], verbose=False)
+            similar_indices = nn_vec(Y_all_hat_norm, w2v.syn0norm, topn=10, sort=True, return_sims=False,
+                                     nthreads=args['threads'], verbose=False)
             print('nn_vec results covert...')
             similar_words = [[w2v.index2word[ind] for ind in row] for row in similar_indices]
             print('done')
 
         for i, (hyponym, hypernym) in enumerate(subsumptions_test):
             if args['non_optimized']:
-                Y_hat  = Y_all_hat[i].reshape(X_all_test.shape[1],)
+                Y_hat = Y_all_hat[i].reshape(X_all_test.shape[1], )
                 actual = [w for w, _ in w2v.most_similar(positive=[Y_hat], topn=10)]
             else:
                 actual = similar_words[i]
@@ -124,7 +130,7 @@ for path in args['path']:
                     model,
                     ats_string,
                     auc),
-                file=sys.stderr, flush=True)
+                      file=sys.stderr, flush=True)
 
         ats = compute_ats(measures)
         auc = compute_auc(ats)
@@ -134,4 +140,4 @@ for path in args['path']:
             model,
             ats_string,
             auc),
-        flush=True)
+              flush=True)

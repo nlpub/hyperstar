@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import argparse
 import csv
@@ -6,15 +6,16 @@ import operator
 import pickle
 import random
 import sys
+from multiprocessing import Pool
+
 import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
-from multiprocessing import Pool
 
 parser = argparse.ArgumentParser(description='Clustering.')
 parser.add_argument('--train', default='train.npz', nargs='?', help='Path to the training set.')
-parser.add_argument('--seed',  default=228, type=int, nargs='?', help='Random seed.')
-parser.add_argument('-k',      type=int, nargs='?', help='Number of clusters.')
+parser.add_argument('--seed', default=228, type=int, nargs='?', help='Random seed.')
+parser.add_argument('-k', type=int, nargs='?', help='Number of clusters.')
 args = vars(parser.parse_args())
 
 RANDOM_SEED = args['seed']
@@ -22,8 +23,8 @@ random.seed(RANDOM_SEED)
 
 with np.load(args['train']) as npz:
     X_index_train = npz['X_index']
-    Y_all_train   = npz['Y_all']
-    Z_all_train   = npz['Z_all']
+    Y_all_train = npz['Y_all']
+    Z_all_train = npz['Z_all']
 
 X_all_train = Z_all_train[X_index_train[:, 0], :]
 
@@ -43,11 +44,13 @@ for k in range(2, 20 + 1):
     kmeans[k].fit_predict(train_offsets)
     print('k-means for k=%d computed.' % (k))
 
+
 def evaluate(k):
     km = kmeans[k]
     score = silhouette_score(train_offsets, km.labels_, metric='euclidean', random_state=RANDOM_SEED)
     print('Silhouette score for k=%d is %f.' % (k, score))
     return (k, score)
+
 
 scores = {}
 

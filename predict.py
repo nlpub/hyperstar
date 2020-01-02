@@ -1,31 +1,35 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import argparse
+import csv
 import os
 import pickle
-from gensim.models.word2vec import Word2Vec
 import sys
-import csv
+from gzip import GzipFile
 from itertools import zip_longest
+
 import numpy as np
 import tensorflow as tf
+from gensim.models.word2vec import Word2Vec
+
 from projlearn import *
-from gzip import GzipFile
 
 os.environ['CUDA_VISIBLE_DEVICES'] = ''
+
 
 def grouper(n, iterable, fillvalue=None):
     args = [iter(iterable)] * n
     return zip_longest(fillvalue=fillvalue, *args)
 
+
 parser = argparse.ArgumentParser(description='Prediction.')
-parser.add_argument('--w2v',    required=True, type=argparse.FileType('rb'))
+parser.add_argument('--w2v', required=True, type=argparse.FileType('rb'))
 parser.add_argument('--kmeans', default='kmeans.pickle', nargs='?', help='Path to k-means.pickle.')
-parser.add_argument('--model',  default='baseline', nargs='?', choices=MODELS.keys(), help='The model.')
-parser.add_argument('--path',   default='', nargs='?', help='The path to the model dump.')
+parser.add_argument('--model', default='baseline', nargs='?', choices=MODELS.keys(), help='The model.')
+parser.add_argument('--path', default='', nargs='?', help='The path to the model dump.')
 parser.add_argument('--slices', default=100000, type=int, help='The slice size.')
 parser.add_argument('--gzip', default=False, action='store_true')
-parser.add_argument('output',   type=argparse.FileType('wb'), help='Output file.')
+parser.add_argument('output', type=argparse.FileType('wb'), help='Output file.')
 args = parser.parse_args()
 
 w2v = Word2Vec.load_word2vec_format(args.w2v, binary=True, unicode_errors='ignore')

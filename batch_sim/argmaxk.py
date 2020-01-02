@@ -1,6 +1,7 @@
-from sys import stderr
 from math import ceil
+
 import numpy as np
+
 from .parallel import parallel_map
 
 __author__ = 'test'
@@ -52,14 +53,16 @@ def argmaxk_rows(arr, k=10, sort=False, impl='opt1', nthreads=8):
         raise ValueError('Unknown value of parameter: impl=%s; possible values: %r' % (impl, IMPLS.keys()))
     fimpl = IMPLS[impl]
 
-    if nthreads==1:
+    if nthreads == 1:
         res = fimpl(arr, k, sort)
     else:
         m = arr.shape[0]
         batchsize = int(ceil(1. * m / nthreads))
+
         def ppp(i):
-            return fimpl(arr[i:i+batchsize, :], k, sort)
-        lres = parallel_map(ppp, range(0,m,batchsize), threads=nthreads)
+            return fimpl(arr[i:i + batchsize, :], k, sort)
+
+        lres = parallel_map(ppp, range(0, m, batchsize), threads=nthreads)
         res = np.vstack(lres)
 
     return res

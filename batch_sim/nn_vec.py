@@ -1,9 +1,10 @@
-from .argmaxk import argmaxk_rows
 import numpy as np
 import psutil
-from sys import stderr
+
+from .argmaxk import argmaxk_rows
 
 __author__ = 'test'
+
 
 def nn_vec_basic(arr1, arr2, topn, sort=True, return_sims=False, nthreads=8):
     """
@@ -30,33 +31,34 @@ def nn_vec_basic(arr1, arr2, topn, sort=True, return_sims=False, nthreads=8):
     return best_inds, sims[rows, best_inds]
 
 
-def nn_vec(m1, m2, topn, sort=True, return_sims=False, nthreads=8, USE_MEM_PERCENT = 0.3,verbose=True):
-    ndists = m1.shape[0] * m2.shape[0] # number of distances
+def nn_vec(m1, m2, topn, sort=True, return_sims=False, nthreads=8, USE_MEM_PERCENT=0.3, verbose=True):
+    ndists = m1.shape[0] * m2.shape[0]  # number of distances
 
-    if m1.shape[0] < 2 or ndists < 10**7: # cannot or need not split m1 into batches
+    if m1.shape[0] < 2 or ndists < 10 ** 7:  # cannot or need not split m1 into batches
         return nn_vec_basic(m1, m2, topn=topn, sort=sort, return_sims=return_sims, nthreads=nthreads)
 
     # estimate memory required to store results:
     # best_inds: m1.shape[0] * topn * tmp1.itemsize, dists: m1.shape[0] * topn * tmp2.itemsize
-    tmp_inds, tmp_dists = nn_vec_basic(m1[:2,:], m2[:2,:], topn=2, sort=False, return_sims=True, nthreads=1)
-    res_mem = m1.shape[0] * topn * ( tmp_inds.itemsize + (tmp_dists.itemsize if return_sims else 0) )
+    tmp_inds, tmp_dists = nn_vec_basic(m1[:2, :], m2[:2, :], topn=2, sort=False, return_sims=True, nthreads=1)
+    res_mem = m1.shape[0] * topn * (tmp_inds.itemsize + (tmp_dists.itemsize if return_sims else 0))
 
     amem = psutil.virtual_memory().available
     use_mem = (amem - res_mem) * USE_MEM_PERCENT
-    dists_mem = ndists * tmp_dists.itemsize # memory required for the whole distances matrix
+    dists_mem = ndists * tmp_dists.itemsize  # memory required for the whole distances matrix
     num_batches = int(np.ceil(dists_mem / use_mem))
     batch_size = int(np.ceil(1.0 * m1.shape[0] / num_batches))
     if verbose:
-        print ( 'Full distances matrix will occupy %.2fG; we would like to occupy %.2fG from %.2fG of available memory...' % \
-            (1.*dists_mem/2**30, 1.*use_mem/2**30, 1.*amem/2**30) )
-        print ('... processing in %d batches of %d rows' % (num_batches, batch_size) )
+        print(
+            'Full distances matrix will occupy %.2fG; we would like to occupy %.2fG from %.2fG of available memory...' % \
+            (1. * dists_mem / 2 ** 30, 1. * use_mem / 2 ** 30, 1. * amem / 2 ** 30))
+        print('... processing in %d batches of %d rows' % (num_batches, batch_size))
 
     res_inds, res_dists = None, None
     for st in range(0, m1.shape[0], batch_size):
-        en = st+batch_size
+        en = st + batch_size
         if verbose:
-            print ( 'Processing rows %d-%d from %d' % (st, min(en-1, m1.shape[0]), m1.shape[0]) )
-        res = nn_vec_basic(m1[st:en,:], m2, topn=topn, sort=sort, return_sims=return_sims, nthreads=nthreads)
+            print('Processing rows %d-%d from %d' % (st, min(en - 1, m1.shape[0]), m1.shape[0]))
+        res = nn_vec_basic(m1[st:en, :], m2, topn=topn, sort=sort, return_sims=return_sims, nthreads=nthreads)
         res0 = res[0] if return_sims else res
         res_inds = np.vstack([res_inds, res0]) if res_inds is not None else res0
         if return_sims:
