@@ -100,7 +100,7 @@ for path in args['path']:
         measures = [{} for _ in range(10)]
 
         if not args['non_optimized']:
-            # normalize Y_all_hat to make dot product equeal to cosine and monotonically decreasing function of euclidean distance
+            # normalize Y_all_hat to make dot product equal to cosine
             Y_all_hat_norm = Y_all_hat / np.linalg.norm(Y_all_hat, axis=1)[:, np.newaxis]
             print('nn_vec...')
             similar_indices = nn_vec(Y_all_hat_norm, w2v.syn0norm, topn=10, sort=True, return_sims=False,
@@ -135,9 +135,4 @@ for path in args['path']:
         ats = compute_ats(measures)
         auc = compute_auc(ats)
         ats_string = ', '.join(['A@%d=%.4f' % (j + 1, ats[j]) for j in range(len(ats))])
-        print('For "%s/%s": overall %s. AUC=%.6f.' % (
-            path,
-            model,
-            ats_string,
-            auc),
-              flush=True)
+        print('For "%s/%s": overall %s. AUC=%.6f.' % (path, model, ats_string, auc), flush=True)
